@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="160" viewBox="0 0 1200 160" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1200" height="160" rx="18" fill="#161b22"/>
+  <g font-size="16" fill="#aab4bf">
+    <g transform="translate(60 40)">
+      <circle cx="30" cy="30" r="30" fill="#20ae73"/><text x="30" y="40" fill="#fff" font-size="28" font-weight="700" text-anchor="middle">1</text>
+      <text x="80" y="25" fill="#fff" font-size="20" font-weight="700">Baixe</text>
+      <text x="80" y="52">o CloudDraw-Setup da</text><text x="80" y="74">última versão</text>
+    </g>
+    <path d="M340 70 h40 m-12 -10 l12 10 l-12 10" stroke="#3a8bf0" stroke-width="3" fill="none"/>
+    <g transform="translate(420 40)">
+      <circle cx="30" cy="30" r="30" fill="#20ae73"/><text x="30" y="40" fill="#fff" font-size="28" font-weight="700" text-anchor="middle">2</text>
+      <text x="80" y="25" fill="#fff" font-size="20" font-weight="700">Instale</text>
+      <text x="80" y="52">sem administrador, com</text><text x="80" y="74">atalho na área de trabalho</text>
+    </g>
+    <path d="M760 70 h40 m-12 -10 l12 10 l-12 10" stroke="#3a8bf0" stroke-width="3" fill="none"/>
+    <g transform="translate(840 40)">
+      <circle cx="30" cy="30" r="30" fill="#20ae73"/><text x="30" y="40" fill="#fff" font-size="28" font-weight="700" text-anchor="middle">3</text>
+      <text x="80" y="25" fill="#fff" font-size="20" font-weight="700">Entre</text>
+      <text x="80" y="52">com sua conta Premium; as</text><text x="80" y="74">atualizações chegam sozinhas</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14181f"/>
+      <stop offset="1" stop-color="#1d2a2a"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="10" y1="4" x2="55" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4bd68a"/><stop offset=".48" stop-color="#20ae73"/><stop offset="1" stop-color="#087f59"/>
+    </linearGradient>
+    <linearGradient id="curve" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4bd68a" stop-opacity="0"/><stop offset=".5" stop-color="#4bd68a"/><stop offset="1" stop-color="#3a8bf0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="360" rx="18" fill="url(#bg)"/>
+  <g stroke="#ffffff" stroke-opacity=".04">
+    <path d="M0 60H1200M0 120H1200M0 180H1200M0 240H1200M0 300H1200"/>
+    <path d="M100 0V360M200 0V360M300 0V360M400 0V360M500 0V360M600 0V360M700 0V360M800 0V360M900 0V360M1000 0V360M1100 0V360"/>
+  </g>
+  <path d="M640 290 C 720 120, 860 330, 1000 150 S 1150 90, 1180 120" stroke="url(#curve)" stroke-width="5" fill="none"/>
+  <g stroke="#3a8bf0" stroke-width="1.5"><path d="M1000 150 L 940 225 M1000 150 L 1060 75"/></g>
+  <g fill="#14181f" stroke="#ffffff" stroke-width="2">
+    <rect x="634" y="284" width="12" height="12"/><rect x="994" y="144" width="12" height="12"/><rect x="1174" y="114" width="12" height="12"/>
+  </g>
+  <g fill="#3a8bf0"><circle cx="940" cy="225" r="5"/><circle cx="1060" cy="75" r="5"/></g>
+  <g transform="translate(70 92) scale(2.6)">
+    <rect x="3" y="3" width="58" height="58" rx="14" fill="url(#tile)"/>
+    <path d="M19 48h25a9 9 0 0 0 .4-18A13 13 0 0 0 19 28a10 10 0 0 0 0 20Z" fill="#035237" opacity=".28"/>
+    <path d="M19 44h25a9 9 0 0 0 .4-18A13 13 0 0 0 19 24a10 10 0 0 0 0 20Z" fill="#fff"/>
+  </g>
+  <text x="260" y="168" fill="#ffffff" font-size="72" font-weight="700">CloudDraw</text>
+  <text x="262" y="214" fill="#b8c2cc" font-size="26">Editor vetorial profissional para Windows</text>
+  <g font-size="17" font-weight="600">
+    <rect x="262" y="246" width="128" height="34" rx="17" fill="#20ae73" fill-opacity=".18" stroke="#20ae73"/>
+    <text x="326" y="268" fill="#7fe3ad" text-anchor="middle">Curvas Bézier</text>
+    <rect x="402" y="246" width="118" height="34" rx="17" fill="#3a8bf0" fill-opacity=".18" stroke="#3a8bf0"/>
+    <text x="461" y="268" fill="#9cc6fa" text-anchor="middle">Abre CDR</text>
+    <rect x="532" y="246" width="96" height="34" rx="17" fill="#e0a43a" fill-opacity=".18" stroke="#e0a43a"/>
+    <text x="580" y="268" fill="#f0c97a" text-anchor="middle">PDF</text>
+  </g>
+</svg>

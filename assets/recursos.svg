@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1200" height="560" rx="18" fill="#161b22"/>
+  <g font-size="15" fill="#aab4bf">
+    <rect x="30" y="30" width="360" height="235" rx="14" fill="#1e252e" stroke="#2c3540"/>
+    <path d="M70 120 C 110 50, 170 150, 220 80" stroke="#4bd68a" stroke-width="4" fill="none"/>
+    <g fill="#1e252e" stroke="#fff" stroke-width="2"><rect x="64" y="114" width="12" height="12"/><rect x="214" y="74" width="12" height="12"/></g>
+    <text x="60" y="185" fill="#fff" font-size="22" font-weight="700">Curvas de verdade</text>
+    <text x="60" y="213">Nós e alças Bézier, nó suave, cúspide</text>
+    <text x="60" y="235">e simétrico, soldar, aparar, interseção.</text>
+
+    <rect x="420" y="30" width="360" height="235" rx="14" fill="#1e252e" stroke="#2c3540"/>
+    <g transform="translate(460 60)"><path d="M0 0h48l22 22v68H0z" fill="#3a8bf0" fill-opacity=".2" stroke="#3a8bf0" stroke-width="2.5"/><text x="12" y="62" fill="#9cc6fa" font-size="20" font-weight="700">CDR</text></g>
+    <g transform="translate(550 60)"><path d="M0 0h48l22 22v68H0z" fill="#e0a43a" fill-opacity=".2" stroke="#e0a43a" stroke-width="2.5"/><text x="13" y="62" fill="#f0c97a" font-size="20" font-weight="700">PDF</text></g>
+    <g transform="translate(640 60)"><path d="M0 0h48l22 22v68H0z" fill="#4bd68a" fill-opacity=".2" stroke="#4bd68a" stroke-width="2.5"/><text x="12" y="62" fill="#7fe3ad" font-size="20" font-weight="700">SVG</text></g>
+    <text x="450" y="185" fill="#fff" font-size="22" font-weight="700">Abre seus arquivos</text>
+    <text x="450" y="213">Importa CDR, PDF e SVG com textos</text>
+    <text x="450" y="235">editáveis; exporta PDF, SVG, PNG e JPEG.</text>
+
+    <rect x="810" y="30" width="360" height="235" rx="14" fill="#1e252e" stroke="#2c3540"/>
+    <g transform="translate(850 58)">
+      <g fill="#3a8bf0"><rect x="0" y="0" width="12" height="12"/><rect x="12" y="12" width="12" height="12"/><rect x="0" y="24" width="12" height="12"/><rect x="24" y="24" width="12" height="12"/><rect x="12" y="36" width="12" height="12"/><rect x="0" y="48" width="12" height="12"/><rect x="24" y="48" width="12" height="12"/><rect x="36" y="36" width="12" height="12"/></g>
+      <path d="M70 34 h40 m-12 -10 l12 10 l-12 10" stroke="#aab4bf" stroke-width="3" fill="none"/>
+      <path d="M130 60 C 130 0, 210 0, 210 30 S 170 70, 130 60Z" fill="#3a8bf0"/>
+    </g>
+    <text x="840" y="185" fill="#fff" font-size="22" font-weight="700">Rastrear bitmap</text>
+    <text x="840" y="213">Transforma imagens em vetores com</text>
+    <text x="840" y="235">cores, degradês e curvas editáveis.</text>
+
+    <rect x="30" y="295" width="360" height="235" rx="14" fill="#1e252e" stroke="#2c3540"/>
+    <path d="M70 380 C 120 330, 170 410, 230 350" stroke="#e05a8a" stroke-width="14" stroke-linecap="round" fill="none" opacity=".85"/>
+    <path d="M70 380 C 120 330, 170 410, 230 350" stroke="#ffffff" stroke-width="2" stroke-dasharray="2 6" fill="none" opacity=".5"/>
+    <text x="60" y="450" fill="#fff" font-size="22" font-weight="700">116 pincéis artísticos</text>
+    <text x="60" y="478">Óleo, aquarela, giz, lápis e partículas,</text>
+    <text x="60" y="500">com textura de papel e mesa digitalizadora.</text>
+
+    <rect x="420" y="295" width="360" height="235" rx="14" fill="#1e252e" stroke="#2c3540"/>
+    <g transform="translate(455 325)" stroke="#4bd68a" stroke-width="3" fill="none">
+      <rect x="0" y="5" width="50" height="40" rx="6"/><circle cx="95" cy="25" r="22"/><path d="M140 47 L160 3 L180 47 Z"/><path d="M215 5 v40 M200 25 h30"/><path d="M250 45 C 260 0, 280 0, 290 45"/>
+    </g>
+    <text x="450" y="450" fill="#fff" font-size="22" font-weight="700">Tudo para desenhar</text>
+    <text x="450" y="478">Formas, texto, tabelas, sombras, misturas,</text>
+    <text x="450" y="500">envelope, extrusão, QR e código de barras.</text>
+
+    <rect x="810" y="295" width="360" height="235" rx="14" fill="#1e252e" stroke="#2c3540"/>
+    <g transform="translate(850 325)" font-size="14" font-weight="700">
+      <rect x="0" y="0" width="70" height="30" rx="6" fill="#2c3540"/><text x="35" y="20" fill="#fff" text-anchor="middle">Ctrl+G</text>
+      <rect x="80" y="0" width="70" height="30" rx="6" fill="#2c3540"/><text x="115" y="20" fill="#fff" text-anchor="middle">Ctrl+Q</text>
+      <rect x="160" y="0" width="70" height="30" rx="6" fill="#2c3540"/><text x="195" y="20" fill="#fff" text-anchor="middle">Ctrl+L</text>
+      <rect x="0" y="40" width="110" height="30" rx="6" fill="#20ae73" fill-opacity=".25"/><text x="55" y="60" fill="#7fe3ad" text-anchor="middle">abas</text>
+      <rect x="120" y="40" width="110" height="30" rx="6" fill="#3a8bf0" fill-opacity=".25"/><text x="175" y="60" fill="#9cc6fa" text-anchor="middle">auto-salvar</text>
+    </g>
+    <text x="840" y="450" fill="#fff" font-size="22" font-weight="700">Rápido de usar</text>
+    <text x="840" y="478">Atalhos e menus familiares, várias abas</text>
+    <text x="840" y="500">e recuperação automática do trabalho.</text>
+  </g>
+</svg>
