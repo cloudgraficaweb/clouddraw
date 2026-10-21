@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudDraw — Editor de vetores com suporte a CDR</title>
+<meta name="description" content="CloudDraw é um editor de gráficos vetoriais para desktop, nativo e rápido, com ferramentas de Bézier, edição de nós, efeitos interativos e leitura de arquivos CDR.">
+<meta name="theme-color" content="#f4f3ef">
+
+<!-- ============================================================
+     OPEN GRAPH / MINIATURA PARA WHATSAPP, TELEGRAM E REDES SOCIAIS
+     Quando publicar no GitHub Pages, troque "SEU-USUARIO/SEU-REPO"
+     pelo endereço real do seu repositório (o WhatsApp exige URL
+     completa com https:// apontando para PNG ou JPG de 1200x630).
+     ============================================================ -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="CloudDraw">
+<meta property="og:title" content="CloudDraw — Editor de vetores desktop com suporte a CDR">
+<meta property="og:description" content="Editor vetorial nativo em Rust e OpenGL. Curvas Bézier, edição de nós, efeitos interativos e abertura direta de arquivos .CDR.">
+<meta property="og:url" content="https://SEU-USUARIO.github.io/SEU-REPO/">
+<meta property="og:image" content="https://SEU-USUARIO.github.io/SEU-REPO/og-image.png">
+<meta property="og:image:secure_url" content="https://SEU-USUARIO.github.io/SEU-REPO/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Interface do CloudDraw abrindo um projeto vetorial com suporte a arquivos CDR">
+
+<!-- Twitter / Discord / Prévia expandida -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CloudDraw — Editor de vetores desktop com suporte a CDR">
+<meta name="twitter:description" content="Editor vetorial nativo em Rust e OpenGL com ferramentas de Bézier, edição de nós e leitura de arquivos CDR.">
+<meta name="twitter:image" content="https://SEU-USUARIO.github.io/SEU-REPO/og-image.png">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2327a260'/%3E%3Cstop offset='1' stop-color='%23178a5a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cg fill='%23fff' transform='translate(-2 2)'%3E%3Ccircle cx='25' cy='35' r='9'/%3E%3Ccircle cx='35' cy='28' r='12'/%3E%3Ccircle cx='45' cy='36' r='8'/%3E%3Crect x='18' y='35' width='35' height='10' rx='5'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f3ef; --bg2:#eae8e1; --panel:#ffffff; --panel2:#faf9f5;
+  --line:rgba(24,24,27,.10); --line2:rgba(24,24,27,.18);
+  --text:#18181b; --muted:#52525b; --g1:#1e824c; --g2:#15693b; --g3:#0f4d2b;
+  --blue:#1b6ec2; --pink:#d9467e;
+  --r:18px;
+  --font:"Inter","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Code","SF Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img,svg{display:block;max-width:100%}
+.wrap{width:min(1160px,calc(100% - 40px));margin:0 auto}
+section{position:relative;padding:110px 0}
+h1,h2,h3{line-height:1.12;letter-spacing:-.02em;color:var(--text)}
+h2{font-size:clamp(30px,4.2vw,46px);font-weight:750}
+.grad{background:linear-gradient(100deg,#15693b 0%,#1e824c 45%,#1b6ec2 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g1);margin-bottom:16px}
+.eyebrow::before{content:"";width:22px;height:2px;background:var(--g1);border-radius:2px}
+.lead{color:var(--muted);font-size:18px;max-width:640px;margin-top:16px}
+.sec-head{margin-bottom:56px}
+.center{text-align:center}.center .lead{margin-inline:auto}.center .eyebrow{justify-content:center}
+
+/* progress + nav */
+#prog{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--g1),var(--blue));z-index:100}
+nav{position:fixed;top:0;left:0;right:0;z-index:90;transition:background .3s,border-color .3s,backdrop-filter .3s,box-shadow .3s;border-bottom:1px solid transparent}
+nav.scrolled{background:rgba(244,243,239,.88);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border-color:var(--line);box-shadow:0 4px 20px rgba(24,24,27,.05)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:19px;letter-spacing:-.01em;color:var(--text)}
+.brand svg{width:34px;height:34px;filter:drop-shadow(0 4px 10px rgba(23,138,90,.28))}
+.links{display:flex;gap:30px;font-size:14.5px;color:var(--muted);font-weight:500}
+.links a{position:relative;transition:color .2s}
+.links a:hover{color:var(--text)}
+.links a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:100%;background:var(--g1);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.links a:hover::after{transform:scaleX(1)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:12px;font-weight:650;font-size:15px;border:1px solid var(--line2);background:#ffffff;color:var(--text);cursor:pointer;transition:transform .25s,box-shadow .25s,background .25s,border-color .25s;position:relative;overflow:hidden;font-family:inherit;box-shadow:0 2px 6px rgba(24,24,27,.05)}
+.btn:hover{transform:translateY(-2px);border-color:rgba(24,24,27,.32);background:var(--panel2);box-shadow:0 8px 20px rgba(24,24,27,.08)}
+.btn svg{width:18px;height:18px}
+.btn.primary{background:linear-gradient(135deg,#259b5c,var(--g2));border-color:transparent;color:#ffffff;box-shadow:0 10px 26px -8px rgba(30,130,76,.5)}
+.btn.primary:hover{box-shadow:0 16px 34px -8px rgba(30,130,76,.65);background:linear-gradient(135deg,#2bb069,#197a46)}
+.btn.primary::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:shine 4.5s ease-in-out infinite}
+@keyframes shine{0%,55%{left:-120%}85%,100%{left:160%}}
+.btn.sm{padding:9px 16px;font-size:14px;border-radius:10px}
+.pill{font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:99px;background:rgba(0,0,0,.22);color:#fff;text-transform:uppercase}
+.btn:not(.primary) .pill{background:rgba(30,130,76,.12);color:var(--g1)}
+
+/* hero */
+#hero{padding:150px 0 90px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+.hero-bg::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(900px 500px at 15% 0%,rgba(30,130,76,.10),transparent 60%),
+  radial-gradient(800px 500px at 90% 20%,rgba(27,110,194,.08),transparent 60%)}
+.hero-bg::after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(24,24,27,.14) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse at 50% 30%,#000 0%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 0%,transparent 70%);opacity:.45}
+.float-svg{position:absolute;opacity:.55}
+.hero-in{position:relative;z-index:1;text-align:center}
+.badge{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border:1px solid var(--line2);border-radius:99px;font-size:13px;color:var(--muted);background:rgba(255,255,255,.75);margin-bottom:26px;font-weight:500;box-shadow:0 2px 8px rgba(24,24,27,.04)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--g1);box-shadow:0 0 0 0 rgba(30,130,76,.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(30,130,76,0)}100%{box-shadow:0 0 0 0 rgba(30,130,76,0)}}
+h1{font-size:clamp(40px,7vw,76px);font-weight:800;letter-spacing:-.035em;max-width:900px;margin:0 auto}
+.hero-in .lead{margin:24px auto 0;font-size:clamp(16px,2vw,20px);max-width:680px}
+.cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:38px}
+.mini-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;margin-top:44px;color:var(--muted);font-size:14px}
+.mini-stats b{display:block;color:var(--text);font-size:15px}
+.mock-wrap{position:relative;z-index:1;margin-top:64px;perspective:1600px}
+#tilt{transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform}
+.mock{position:relative;border-radius:12px;box-shadow:0 38px 90px -24px rgba(24,24,27,.38),0 0 0 1px rgba(24,24,27,.22);overflow:hidden;background:#242424}
+.mock svg{width:100%;height:auto}
+.mock-glow{position:absolute;inset:auto 10% -36px;height:70px;background:radial-gradient(ellipse,rgba(30,130,76,.24),transparent 70%);filter:blur(28px);z-index:-1}
+
+/* marquee */
+.marquee{border-block:1px solid var(--line);background:var(--bg2);overflow:hidden;padding:18px 0;white-space:nowrap}
+.marquee-t{display:inline-flex;gap:46px;animation:mq 38s linear infinite;color:var(--muted);font-weight:600;font-size:15px;padding-left:46px}
+.marquee-t span{display:inline-flex;align-items:center;gap:46px}
+.marquee-t span::after{content:"◆";color:var(--g1);font-size:9px}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* features */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{position:relative;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line2);border-radius:var(--r);padding:26px;overflow:hidden;transition:transform .35s,border-color .35s,box-shadow .35s;box-shadow:0 4px 14px rgba(24,24,27,.04)}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(400px 200px at var(--mx,50%) var(--my,0%),rgba(30,130,76,.09),transparent 60%);opacity:0;transition:opacity .35s}
+.card:hover{transform:translateY(-6px);border-color:rgba(30,130,76,.5);box-shadow:0 22px 44px -20px rgba(24,24,27,.16)}
+.card:hover::before{opacity:1}
+.card .art{height:100px;margin-bottom:20px;border-radius:12px;background:#1c2420;border:1px solid rgba(24,24,27,.12);display:grid;place-items:center;position:relative}
+.card .art svg{width:100%;height:100%}
+.card h3{font-size:19px;margin-bottom:8px;position:relative;color:var(--text)}
+.card p{color:var(--muted);font-size:15px;position:relative}
+.draw{stroke-dasharray:1;stroke-dashoffset:0}
+.in .draw{animation:draw 1.6s cubic-bezier(.5,0,.2,1) both}
+.card:hover .draw{animation:draw 1.2s cubic-bezier(.5,0,.2,1) both}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.spin{transform-box:fill-box;transform-origin:center;animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bob{animation:bob 3.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+
+/* bezier lab */
+#bezier{background:linear-gradient(180deg,var(--bg),var(--bg2) 50%,var(--bg))}
+.lab{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;align-items:stretch}
+.lab-canvas{background:#18221e;border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;box-shadow:0 24px 56px -24px rgba(24,24,27,.28)}
+.lab-top{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.08);background:#222e29;font-size:13px;color:#b8ccc3}
+.lab-top i{width:10px;height:10px;border-radius:50%;background:#465a52;display:inline-block}
+.lab-top span{margin-left:8px}
+#bz{width:100%;height:auto;touch-action:none;cursor:default;background:
+  linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px) 0 0/30px 30px,
+  linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px) 0 0/30px 30px}
+#bz .h{cursor:grab}
+#bz .h:active{cursor:grabbing}
+.lab-side{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line2);border-radius:var(--r);padding:28px;display:flex;flex-direction:column;gap:20px;box-shadow:0 4px 14px rgba(24,24,27,.04)}
+.lab-side h3{font-size:22px}
+.lab-side p{color:var(--muted);font-size:15px}
+.ctrl{display:flex;flex-direction:column;gap:14px;padding:18px;background:var(--bg);border:1px solid var(--line);border-radius:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px}
+.row label{color:var(--muted);font-weight:500}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:5px;background:linear-gradient(90deg,var(--g1),var(--blue));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--g1);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--g1);cursor:pointer}
+.switch{position:relative;width:42px;height:24px;flex:none}
+.switch input{opacity:0;position:absolute;inset:0;cursor:pointer;z-index:2;margin:0}
+.switch i{position:absolute;inset:0;border-radius:99px;background:#c8c5bc;transition:background .25s}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch input:checked+i{background:var(--g1)}
+.switch input:checked+i::after{transform:translateX(18px)}
+code.out{display:block;font-family:var(--mono);font-size:12.5px;color:var(--g2);background:var(--bg2);border:1px solid var(--line2);padding:12px 14px;border-radius:10px;word-break:break-all;font-weight:600}
+.hint{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
+
+/* cdr */
+.pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative;margin-bottom:70px}
+.step{position:relative;text-align:center;padding:0 10px}
+.step .ic{width:74px;height:74px;margin:0 auto 18px;border-radius:20px;background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line2);display:grid;place-items:center;position:relative;z-index:2;transition:transform .3s,border-color .3s,box-shadow .3s;box-shadow:0 6px 16px rgba(24,24,27,.06)}
+.step:hover .ic{transform:translateY(-5px) rotate(-3deg);border-color:var(--g1);box-shadow:0 12px 24px rgba(30,130,76,.15)}
+.step .ic svg{width:34px;height:34px}
+.step:not(:last-child)::after{content:"";position:absolute;top:37px;left:calc(50% + 46px);right:calc(-50% + 46px);height:2px;background:repeating-linear-gradient(90deg,var(--g1) 0 6px,transparent 6px 12px);background-size:24px 2px;animation:flow 1s linear infinite;opacity:.8}
+@keyframes flow{to{background-position:24px 0}}
+.step b{display:block;font-size:16px;margin-bottom:4px;color:var(--text)}
+.step small{color:var(--muted);font-size:13.5px;display:block;line-height:1.45}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.stat{padding:24px 16px;text-align:center;border:1px solid var(--line2);border-radius:16px;background:linear-gradient(180deg,var(--panel),var(--panel2));box-shadow:0 4px 12px rgba(24,24,27,.04)}
+.stat b{display:block;font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.stat span{color:var(--muted);font-size:13.5px}
+.note{margin-top:28px;padding:18px 22px;border:1px solid rgba(180,120,20,.32);background:rgba(245,175,45,.10);border-radius:14px;color:#5c4211;font-size:14.5px;display:flex;gap:14px;align-items:flex-start}
+.note svg{width:20px;height:20px;flex:none;margin-top:2px;color:#b87814}
+
+/* interface */
+.ui-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.checks{list-style:none;margin-top:26px;display:grid;gap:14px}
+.checks li{display:flex;gap:12px;color:var(--muted);font-size:16px}
+.checks li::before{content:"";flex:none;width:22px;height:22px;margin-top:2px;border-radius:50%;background:rgba(30,130,76,.14) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e824c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/13px no-repeat}
+.checks b{color:var(--text)}
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.key{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line2);border-radius:12px;font-size:14px;color:var(--muted);transition:border-color .3s,transform .3s,box-shadow .3s;box-shadow:0 2px 8px rgba(24,24,27,.03)}
+.key:hover{border-color:rgba(30,130,76,.5);transform:translateY(-3px);box-shadow:0 10px 20px rgba(24,24,27,.08)}
+kbd{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--bg);border:1px solid var(--line2);border-bottom-width:3px;border-radius:7px;padding:3px 8px;white-space:nowrap;font-weight:600}
+.keys-title{margin:0 0 16px;font-size:14px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+
+/* tech */
+.tech{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.tech .card{padding:22px}
+.tech .card h3{font-size:17px}
+.tech .card p{font-size:14px}
+
+/* download */
+#download{padding-bottom:120px}
+.dl{position:relative;border-radius:28px;padding:64px 40px;text-align:center;overflow:hidden;border:1px solid rgba(30,130,76,.32);background:
+  radial-gradient(700px 300px at 50% 0%,rgba(30,130,76,.12),transparent 70%),
+  linear-gradient(180deg,var(--panel),var(--bg2));box-shadow:0 20px 50px -24px rgba(24,24,27,.14)}
+.dl-logo{width:92px;height:92px;margin:0 auto 26px;animation:bob 4s ease-in-out infinite;filter:drop-shadow(0 12px 24px rgba(23,138,90,.35))}
+.dl h2{margin-bottom:14px}
+.dl .lead{margin:0 auto 34px}
+.dl .cta{margin-top:0}
+.dl-meta{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:34px;color:var(--muted);font-size:14px;font-weight:500}
+.dl-meta span{display:inline-flex;align-items:center;gap:8px}
+.dl-meta svg{width:16px;height:16px;color:var(--g1)}
+
+footer{border-top:1px solid var(--line2);background:var(--bg2);padding:42px 0;color:var(--muted);font-size:13.5px}
+.foot{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;align-items:flex-start}
+.foot .brand{font-size:16px}
+.foot .brand svg{width:26px;height:26px}
+.foot p{max-width:560px;line-height:1.6}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:#18181b;border:1px solid rgba(79,209,139,.45);color:#f4f3ef;padding:13px 20px;border-radius:12px;font-size:14.5px;box-shadow:0 20px 40px -10px rgba(0,0,0,.35);z-index:200;transition:.4s cubic-bezier(.2,.9,.3,1.2)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+.reveal.in{opacity:1;transform:none}
+
+/* hero mock animation */
+.nodes>*{transform-box:fill-box;transform-origin:center;animation:nodeShow 8s infinite both}
+@keyframes nodeShow{0%,50%{opacity:0;transform:scale(.3)}56%,90%{opacity:1;transform:scale(1)}97%,100%{opacity:0;transform:scale(.6)}}
+
+@media(max-width:980px){
+  .grid,.tech{grid-template-columns:repeat(2,1fr)}
+  .lab,.ui-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .pipe{grid-template-columns:1fr;gap:34px}
+  .step:not(:last-child)::after{display:none}
+  .links{display:none}
+}
+@media(max-width:640px){
+  section{padding:80px 0}
+  .grid,.tech,.keys{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  #hero{padding-top:120px}
+  .dl{padding:48px 22px}
+  .mini-stats{gap:24px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+}
+
+/* Editor demonstrativo: comandos discretos integrados ao mockup */
+.cd-demo-bar{background:#252525;color:#d5d5d5;border:1px solid #3c3c3c;border-bottom:0;border-radius:11px 11px 0 0;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:9px 12px;font-size:12px;text-align:left;flex-wrap:wrap}
+.cd-demo-bar .cd-status{display:flex;align-items:center;gap:8px;min-width:0}
+.cd-demo-bar .cd-status:before{content:"";width:7px;height:7px;border-radius:50%;background:#47cf83;box-shadow:0 0 0 3px #47cf8321;flex:none}
+.cd-demo-bar .cd-status span{color:#9fa6a5}
+.cd-demo-bar .cd-controls{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.cd-demo-bar button{border:1px solid #505050;color:#e5e5e5;background:#363636;padding:5px 10px;border-radius:5px;font:600 12px var(--font);line-height:1.2;cursor:pointer;transition:background .2s;min-height:26px}
+.cd-demo-bar button:hover{background:#165e98;border-color:#257ec3}
+.cd-demo-bar button:disabled{opacity:.35;cursor:default}
+.cd-demo-bar #cdZoomValue{min-width:45px;display:inline-block;text-align:center;font-family:var(--mono);font-size:11px;color:#ecf0f3}
+.cd-demo-hint{padding:10px 14px 12px;border:1px solid #dedbd1;border-top:0;border-radius:0 0 11px 11px;background:#fff;color:#66655f;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left}
+.cd-demo-hint b{color:#1e824c;font-weight:750}
+.mock:has(#cdViewport){border-radius:0 0 2px 2px}
+#mockSvg{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:default}
+#mockSvg.cd-dragging{touch-action:none}
+#mockSvg #cdWorkspaceClip, #mockSvg #cdViewport, #mockSvg #cdObjects, #mockSvg .cd-workspace, #mockSvg .cd-object, #mockSvg .cd-handle{touch-action:none}
+#mockSvg .cd-workspace{cursor:crosshair}
+#mockSvg[data-tool="select"] .cd-workspace{cursor:default}
+#mockSvg[data-tool="hand"] .cd-workspace{cursor:grab}
+#mockSvg[data-tool="zoom"] .cd-workspace{cursor:zoom-in}
+#mockSvg .cd-object{cursor:move}
+#mockSvg[data-tool="rect"] .cd-object,#mockSvg[data-tool="ellipse"] .cd-object,#mockSvg[data-tool="pen"] .cd-object,#mockSvg[data-tool="brush"] .cd-object{cursor:crosshair}
+#mockSvg .cd-handle{cursor:nwse-resize;stroke:#0d5fb3;fill:#ffffff;stroke-width:1.1}
+#mockSvg .cd-handle[data-handle="n"],#mockSvg .cd-handle[data-handle="s"]{cursor:ns-resize}
+#mockSvg .cd-handle[data-handle="w"],#mockSvg .cd-handle[data-handle="e"]{cursor:ew-resize}
+#mockSvg .cd-handle[data-handle="ne"],#mockSvg .cd-handle[data-handle="sw"]{cursor:nesw-resize}
+#mockSvg .cd-tool-hotspot{cursor:pointer}
+#mockSvg .cd-palette-color{cursor:pointer}
+#mockSvg .cd-palette-color:hover{stroke:white;stroke-width:1.2}
+#mockSvg:focus-visible{outline:3px solid #178a5a;outline-offset:3px}
+@media(max-width:640px){.cd-demo-bar{justify-content:center}.cd-demo-bar .cd-status{width:100%;justify-content:center}.cd-demo-hint{display:block;text-align:center}.cd-demo-hint span{display:block;margin-top:4px}}
+
+</style>
+</head>
+<body>
+
+<!-- símbolos compartilhados -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#35b872"/><stop offset="1" stop-color="#178a5a"/></linearGradient>
+    <g id="cl"><circle cx="25" cy="35" r="9"/><circle cx="35" cy="28" r="12"/><circle cx="45" cy="36" r="8"/><rect x="18" y="35" width="35" height="10" rx="5"/></g>
+    <symbol id="logo" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="16" fill="url(#lg)"/>
+      <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/>
+      <g transform="translate(-2 1)"><use href="#cl" fill="#0d6b44" y="3.5" opacity=".7"/><use href="#cl" fill="#fff"/></g>
+    </symbol>
+  </defs>
+</svg>
+
+<div id="prog"></div>
+
+<nav id="nav">
+  <div class="wrap nav-in">
+    <a href="#top" class="brand"><svg><use href="#logo"/></svg>CloudDraw</a>
+    <div class="links">
+      <a href="#recursos">Recursos</a>
+      <a href="#bezier">Bézier</a>
+      <a href="#cdr">Suporte a CDR</a>
+      <a href="#interface">Interface</a>
+      <a href="#download">Download</a>
+    </div>
+    <a href="#download" class="btn primary sm" data-download>Download <span class="pill" data-soon>Em breve</span></a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header id="hero">
+  <div class="hero-bg" aria-hidden="true">
+    <svg class="float-svg" style="left:-60px;top:140px;width:420px" viewBox="0 0 400 300" fill="none">
+      <path d="M20 250C60 40 220 20 260 140S360 250 390 60" stroke="#1e824c" stroke-opacity=".35" stroke-width="2"/>
+      <path d="M20 250L60 40M260 140L220 20M260 140L330 230" stroke="#1b6ec2" stroke-opacity=".35"/>
+      <rect x="15" y="245" width="10" height="10" fill="#1b6ec2"/><rect x="255" y="135" width="10" height="10" fill="#1b6ec2"/>
+      <circle cx="60" cy="40" r="5" fill="#1b6ec2"/><circle cx="220" cy="20" r="5" fill="#1b6ec2"/><circle cx="330" cy="230" r="5" fill="#1b6ec2"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0;12 -14;0 0" dur="9s" repeatCount="indefinite"/>
+    </svg>
+    <svg class="float-svg" style="right:-40px;top:200px;width:380px" viewBox="0 0 400 300" fill="none">
+      <path d="M380 40C330 260 150 280 120 160S40 40 10 230" stroke="#1b6ec2" stroke-opacity=".32" stroke-width="2"/>
+      <path d="M380 40L330 260M120 160L150 280M120 160L40 40" stroke="#1e824c" stroke-opacity=".32"/>
+      <rect x="375" y="35" width="10" height="10" fill="#1e824c"/><rect x="115" y="155" width="10" height="10" fill="#1e824c"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0;-14 10;0 0" dur="11s" repeatCount="indefinite"/>
+    </svg>
+  </div>
+
+  <div class="wrap hero-in" id="top">
+    <div class="badge reveal"><span class="dot"></span>Em desenvolvimento ativo · leitura de arquivos CDR</div>
+    <h1 class="reveal" style="--d:.08s">Desenhe em vetores.<br><span class="grad">Abra seus arquivos CDR.</span></h1>
+    <p class="lead reveal" style="--d:.16s">O CloudDraw é um editor de gráficos vetoriais para desktop, nativo e veloz, com Bézier, edição de nós, efeitos interativos e as ferramentas que você já conhece.</p>
+    <div class="cta reveal" style="--d:.24s">
+      <a href="#download" class="btn primary" data-download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
+        Baixar CloudDraw <span class="pill" data-soon>Em breve</span>
+      </a>
+      <a href="#recursos" class="btn">Explorar recursos
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="mini-stats reveal" style="--d:.32s">
+      <div><b>Nativo em Rust</b>sem navegador embutido</div>
+      <div><b>CDR · SVG · PNG · JPG</b>importação direta</div>
+      <div><b>Arrastar e soltar</b>abre na hora</div>
+    </div>
+
+    <!-- mockup fiel à captura de tela real do CloudDraw -->
+    <div class="mock-wrap reveal" style="--d:.4s">
+      <div id="tilt">
+        <div class="cd-demo-bar" id="cdDemoBar" aria-label="Controles da demonstração interativa">
+          <div class="cd-status"><b>CloudDraw em ação</b><span>· experimente as ferramentas abaixo</span></div>
+          <div class="cd-controls">
+            <button type="button" data-cd-action="undo" title="Desfazer (Ctrl+Z)">↶</button>
+            <button type="button" data-cd-action="redo" title="Refazer (Ctrl+Y)">↷</button>
+            <button type="button" data-cd-action="zoomout" title="Reduzir zoom">−</button>
+            <span id="cdZoomValue">74%</span>
+            <button type="button" data-cd-action="zoomin" title="Ampliar zoom">+</button>
+            <button type="button" data-cd-action="fit" title="Restaurar a página">Ajustar</button>
+            <button type="button" data-cd-action="reset" title="Reiniciar a demonstração">Recomeçar</button>
+          </div>
+        </div>
+        <div class="mock">
+          <svg viewBox="0 0 1120 620" xmlns="http://www.w3.org/2000/svg" id="mockSvg" role="application" aria-label="Demonstração do editor CloudDraw. Escolha as ferramentas à esquerda e desenhe ou mova objetos na folha." tabindex="0" data-tool="select">
+            <defs>
+                  <linearGradient id="eg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3ddc84"/><stop offset="100%" stop-color="#0b4628"/></linearGradient>
+                  <radialGradient id="sg" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#1b4d89"/></radialGradient>
+              <pattern id="tk" width="9.35" height="18" patternUnits="userSpaceOnUse"><line x1="0" y1="12" x2="0" y2="18" stroke="#6c6c6c" stroke-width="1"/></pattern>
+              <pattern id="tkM" width="93.5" height="18" patternUnits="userSpaceOnUse"><line x1="0" y1="4" x2="0" y2="18" stroke="#9e9e9e" stroke-width="1"/></pattern>
+              <pattern id="tkv" width="18" height="9.35" patternUnits="userSpaceOnUse"><line x1="12" y1="0" x2="18" y2="0" stroke="#6c6c6c" stroke-width="1"/></pattern>
+              <pattern id="tkvM" width="18" height="93.5" patternUnits="userSpaceOnUse"><line x1="4" y1="0" x2="18" y2="0" stroke="#9e9e9e" stroke-width="1"/></pattern>
+              <filter id="ps" x="-6%" y="-6%" width="112%" height="116%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity=".42"/></filter>
+              <clipPath id="cv"><rect x="46" y="128" width="1048" height="422"/></clipPath>
+            </defs>
+
+            <!-- Fundo geral da janela -->
+            <rect width="1120" height="620" fill="#242424"/>
+
+            <!-- 1. Barra de Menus Superior -->
+            <rect width="1120" height="24" fill="#1f1f1f"/>
+            <g fill="#d4d4d4" font-size="11" font-family="Segoe UI,Arial,sans-serif">
+              <text x="12" y="16">Arquivo</text>
+              <text x="58" y="16">Editar</text>
+              <text x="96" y="16">Exibir</text>
+              <text x="133" y="16">Layout</text>
+              <text x="176" y="16">Objeto</text>
+              <text x="219" y="16">Efeitos</text>
+              <text x="261" y="16">Bitmaps</text>
+              <text x="311" y="16">Texto</text>
+              <text x="348" y="16">Tabela</text>
+              <text x="390" y="16">Ferramentas</text>
+              <text x="460" y="16">Janela</text>
+              <text x="500" y="16">Ajuda</text>
+            </g>
+            <!-- Botão Minha Conta -->
+            <rect x="1034" y="3" width="76" height="18" rx="3" fill="#0f548c"/>
+            <text x="1072" y="15.5" text-anchor="middle" fill="#e8f2fc" font-size="10.5" font-family="Segoe UI,Arial,sans-serif">Minha Conta</text>
+            <line x1="0" y1="24" x2="1120" y2="24" stroke="#141414"/>
+
+            <!-- 2. Barra de Ferramentas Padrão -->
+            <rect y="25" width="1120" height="32" fill="#2b2b2b"/>
+            <g stroke="#cfcfcf" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Novo documento + sinal verde -->
+              <rect x="11" y="33" width="12" height="15" rx="1"/>
+              <circle cx="23" cy="34" r="3.5" fill="#27a260" stroke="none"/>
+              <path d="M23 32v4M21 34h4" stroke="#fff" stroke-width="1.2"/>
+              <!-- Abrir pasta -->
+              <path d="M35 36h5l2 2h7v9H35z"/>
+              <path d="M54 40l2.5 2.5L59 40" stroke-width="1.1"/>
+              <!-- Salvar disquete -->
+              <rect x="68" y="33" width="14" height="15" rx="1.5"/>
+              <rect x="71" y="33" width="8" height="5"/><rect x="71" y="42" width="8" height="6"/>
+              <!-- Imprimir -->
+              <path d="M92 37h14v7H92zM95 33h8v4h-8zM95 44h8v4h-8z"/>
+              <line x1="115" y1="31" x2="115" y2="51" stroke="#3d3d3d"/>
+              <!-- Recortar tesoura -->
+              <circle cx="126" cy="45" r="2.5"/><circle cx="133" cy="45" r="2.5"/><path d="M127 43l6-9M132 43l-6-9"/>
+              <!-- Copiar -->
+              <rect x="145" y="33" width="10" height="12" rx="1"/><rect x="149" y="36" width="10" height="12" rx="1" fill="#2b2b2b"/>
+              <!-- Colar -->
+              <rect x="169" y="35" width="12" height="13" rx="1"/><rect x="172" y="32" width="6" height="4" rx="1" fill="#2b2b2b"/>
+              <line x1="190" y1="31" x2="190" y2="51" stroke="#3d3d3d"/>
+              <!-- Desfazer / Refazer -->
+              <path d="M207 37h-6a4 4 0 0 0 0 8h5"/><path d="M203 34l-3 3 3 3"/>
+              <path d="M214 40l2.5 2.5L219 40" stroke-width="1.1"/>
+              <path d="M229 37h6a4 4 0 0 1 0 8h-5"/><path d="M233 34l3 3-3 3"/>
+              <path d="M244 40l2.5 2.5L249 40" stroke-width="1.1"/>
+              <line x1="258" y1="31" x2="258" y2="51" stroke="#3d3d3d"/>
+              <!-- Importar / Exportar / PDF -->
+              <rect x="268" y="34" width="13" height="14" rx="1"/><path d="M274.5 36v7m-3-3l3 3 3-3"/>
+              <rect x="290" y="34" width="13" height="14" rx="1"/><path d="M296.5 43v-7m-3 3l3-3 3 3"/>
+              <rect x="312" y="33" width="13" height="15" rx="1"/>
+              <text x="318.5" y="44" text-anchor="middle" fill="#cfcfcf" stroke="none" font-size="5.5" font-weight="700" font-family="Segoe UI,Arial">PDF</text>
+              <line x1="334" y1="31" x2="334" y2="51" stroke="#3d3d3d"/>
+            </g>
+            <!-- Combo Zoom 74% -->
+            <rect x="342" y="31" width="64" height="20" rx="2" fill="#222222" stroke="#454545"/>
+            <text x="350" y="44.5" fill="#dcdcdc" font-size="10.5" font-family="Segoe UI,Arial">74%</text>
+            <path d="M394 39l3 3 3-3" stroke="#b8b8b8" stroke-width="1.3" fill="none"/>
+            <!-- Ícone Ajustar Página -->
+            <rect x="413" y="32" width="18" height="18" rx="2" fill="none" stroke="#cfcfcf" stroke-width="1.3"/>
+            <rect x="417" y="36" width="10" height="10" fill="none" stroke="#cfcfcf" stroke-width="1"/>
+            <line x1="439" y1="31" x2="439" y2="51" stroke="#3d3d3d"/>
+            <!-- 3 Botões de Exibição (Réguas azul ativo, Grade, Guias azul ativo) -->
+            <rect x="446" y="29" width="22" height="22" rx="3" fill="#1b6ec2"/>
+            <path d="M450 46V34h14" stroke="#fff" stroke-width="1.5" fill="none"/>
+            <ellipse cx="459" cy="42" rx="4" ry="2.5" stroke="#fff" stroke-width="1.2" fill="none"/>
+            <g stroke="#cfcfcf" stroke-width="1.2">
+              <rect x="474" y="33" width="14" height="14" fill="none"/>
+              <line x1="479" y1="33" x2="479" y2="47"/><line x1="483" y1="33" x2="483" y2="47"/>
+              <line x1="474" y1="38" x2="488" y2="38"/><line x1="474" y1="42" x2="488" y2="42"/>
+            </g>
+            <rect x="494" y="29" width="22" height="22" rx="3" fill="#1b6ec2"/>
+            <line x1="505" y1="32" x2="505" y2="48" stroke="#fff" stroke-width="1.4" stroke-dasharray="2 2"/>
+            <line x1="497" y1="40" x2="513" y2="40" stroke="#fff" stroke-width="1.4" stroke-dasharray="2 2"/>
+            <line x1="523" y1="31" x2="523" y2="51" stroke="#3d3d3d"/>
+            <!-- Ímã + Alinhar a -->
+            <path d="M532 45v-5a5 5 0 0 1 10 0v5" stroke="#cfcfcf" stroke-width="1.6" fill="none"/>
+            <rect x="548" y="31" width="60" height="20" rx="2" fill="#222222" stroke="#454545"/>
+            <text x="554" y="44.5" fill="#dcdcdc" font-size="10" font-family="Segoe UI,Arial">Alinhar a</text>
+            <path d="M598 39l2.5 2.5 2.5-2.5" stroke="#b8b8b8" stroke-width="1.2" fill="none"/>
+            <!-- Engrenagem Opções -->
+            <circle cx="624" cy="41" r="4.5" stroke="#cfcfcf" stroke-width="1.6" fill="none"/>
+            <path d="M624 33v2m0 12v2m-8-8h2m12 0h2m-12.5-5.5l1.5 1.5m8 8l1.5 1.5m0-11l-1.5 1.5m-8 8l-1.5 1.5" stroke="#cfcfcf" stroke-width="1.4"/>
+            <line x1="0" y1="57" x2="1120" y2="57" stroke="#181818"/>
+
+            <!-- 3. Barra de Propriedades (A4, Dimensões, Orientação, Unidades) -->
+            <rect y="58" width="1120" height="38" fill="#2b2b2b"/>
+            <!-- Combo A4 -->
+            <rect x="8" y="67" width="108" height="20" rx="2" fill="#222222" stroke="#454545"/>
+            <text x="15" y="80.5" fill="#dcdcdc" font-size="10.5" font-family="Segoe UI,Arial">A4</text>
+            <path d="M105 75l3 3 3-3" stroke="#b8b8b8" stroke-width="1.2" fill="none"/>
+            <!-- Campos 297,0 mm / 210,0 mm -->
+            <g fill="none" stroke="#b8b8b8" stroke-width="1.1">
+              <rect x="126" y="62" width="10" height="12"/><rect x="126" y="78" width="10" height="12"/>
+            </g>
+            <rect x="140" y="61" width="76" height="15" rx="1.5" fill="#202020" stroke="#454545"/>
+            <text x="145" y="71.5" fill="#dcdcdc" font-size="9.5" font-family="Segoe UI,Arial">297,0 mm</text>
+            <rect x="140" y="78" width="76" height="15" rx="1.5" fill="#202020" stroke="#454545"/>
+            <text x="145" y="88.5" fill="#dcdcdc" font-size="9.5" font-family="Segoe UI,Arial">210,0 mm</text>
+            <line x1="224" y1="63" x2="224" y2="91" stroke="#3d3d3d"/>
+            <!-- Retrato / Paisagem (azul ativo) -->
+            <rect x="232" y="69" width="12" height="16" rx="1" fill="none" stroke="#cfcfcf" stroke-width="1.3"/>
+            <rect x="252" y="69" width="10" height="14" rx="1" fill="none" stroke="#cfcfcf" stroke-width="1.3"/>
+            <rect x="270" y="66" width="22" height="22" rx="3" fill="#1b6ec2"/>
+            <rect x="274" y="72" width="14" height="10" rx="1" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="300" y1="63" x2="300" y2="91" stroke="#3d3d3d"/>
+            <!-- Páginas todas / atual -->
+            <rect x="307" y="66" width="22" height="22" rx="3" fill="#1b6ec2"/>
+            <rect x="312" y="70" width="9" height="11" fill="none" stroke="#fff" stroke-width="1.2"/>
+            <rect x="315" y="73" width="9" height="11" fill="#1b6ec2" stroke="#fff" stroke-width="1.2"/>
+            <rect x="335" y="70" width="10" height="12" fill="none" stroke="#cfcfcf" stroke-width="1.2"/>
+            <line x1="354" y1="63" x2="354" y2="91" stroke="#3d3d3d"/>
+            <!-- Unidades: milímetros -->
+            <text x="362" y="80.5" fill="#b8b8b8" font-size="10.5" font-family="Segoe UI,Arial">Unidades:</text>
+            <rect x="412" y="67" width="84" height="20" rx="2" fill="#222222" stroke="#454545"/>
+            <text x="419" y="80.5" fill="#dcdcdc" font-size="10.5" font-family="Segoe UI,Arial">milímetros</text>
+            <path d="M485 75l3 3 3-3" stroke="#b8b8b8" stroke-width="1.2" fill="none"/>
+            <!-- Deslocamento 0,1 mm -->
+            <path d="M506 77h10m-5-5v10" stroke="#cfcfcf" stroke-width="1.2"/>
+            <rect x="520" y="67" width="64" height="20" rx="2" fill="#202020" stroke="#454545"/>
+            <text x="526" y="80.5" fill="#dcdcdc" font-size="10" font-family="Segoe UI,Arial">0,1 mm</text>
+            <!-- Duplicar 5,0 mm / 5,0 mm -->
+            <rect x="600" y="61" width="70" height="15" rx="1.5" fill="#202020" stroke="#454545"/>
+            <text x="606" y="71.5" fill="#dcdcdc" font-size="9.5" font-family="Segoe UI,Arial">5,0 mm</text>
+            <rect x="600" y="78" width="70" height="15" rx="1.5" fill="#202020" stroke="#454545"/>
+            <text x="606" y="88.5" fill="#dcdcdc" font-size="9.5" font-family="Segoe UI,Arial">5,0 mm</text>
+            <!-- Trava / Snap / + -->
+            <rect x="682" y="66" width="22" height="22" rx="3" fill="#1b6ec2"/>
+            <rect x="687" y="71" width="12" height="12" fill="none" stroke="#fff" stroke-width="1.3"/>
+            <text x="748" y="82" fill="#cfcfcf" font-size="16" font-family="Segoe UI,Arial">+</text>
+            <line x1="0" y1="96" x2="1120" y2="96" stroke="#161616"/>
+
+            <!-- 4. Barra de Abas de Documento -->
+            <rect x="28" y="97" width="1092" height="24" fill="#202020"/>
+            <!-- Aba Tela de boas-vindas -->
+            <rect x="30" y="99" width="102" height="21" rx="2" fill="#2e2e2e"/>
+            <path d="M37 111l4-4 4 4v5h-8z" fill="none" stroke="#cfcfcf" stroke-width="1.2"/>
+            <text x="49" y="113" fill="#d0d0d0" font-size="10" font-family="Segoe UI,Arial">Tela de boas-vindas</text>
+            <!-- Aba ativa azul demo * -->
+            <rect x="134" y="99" width="74" height="21" rx="2" fill="#1b6ec2"/>
+            <text x="144" y="113" fill="#ffffff" font-size="10.5" font-weight="600" font-family="Segoe UI,Arial">demo *</text>
+            <!-- Botão + nova aba -->
+            <rect x="210" y="99" width="20" height="21" rx="2" fill="#2a2a2a"/>
+            <text x="220" y="114" text-anchor="middle" fill="#cfcfcf" font-size="14" font-family="Segoe UI,Arial">+</text>
+            <line x1="28" y1="121" x2="1120" y2="121" stroke="#141414"/>
+
+            <!-- 5. Caixa de Ferramentas Esquerda (Corel style com triângulos de submenu) -->
+            <rect y="97" width="28" height="495" fill="#262626"/>
+            <line x1="28" y1="97" x2="28" y2="592" stroke="#171717"/>
+            <!-- Ferramenta Seleção ativa em azul -->
+            <rect x="2" y="100" width="24" height="24" rx="3" fill="#1b6ec2"/>
+            <path d="M9 105v13l3.5-3 2.2 5 2-.9-2.2-5h4.2z" fill="#ffffff"/>
+            <!-- Demais ferramentas da coluna esquerda -->
+            <g fill="none" stroke="#cfcfcf" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Edição de nós (Forma) -->
+              <path d="M8 143l5-10 5 10-5 3z"/><rect x="12" y="131" width="2.5" height="2.5" fill="#cfcfcf"/>
+              <!-- Corte (Crop) -->
+              <path d="M8 160h10v10M10 158v10h10"/>
+              <!-- Zoom (Lupa) -->
+              <circle cx="13" cy="189" r="4.5"/><path d="M16.5 192.5l4 4"/>
+              <!-- Mão livre / Bézier (+ curva) -->
+              <path d="M7 222c3-8 6-8 8-2s4 5 7-3"/><text x="7" y="215" fill="#cfcfcf" stroke="none" font-size="8">+</text>
+              <!-- Mídia artística (Pincel) -->
+              <path d="M8 249l9-9 2 2-9 9-3 1z"/>
+              <!-- Retângulo -->
+              <rect x="7" y="267" width="14" height="10" rx="1"/>
+              <!-- Elipse -->
+              <ellipse cx="14" cy="301" rx="7" ry="5"/>
+              <!-- Polígono -->
+              <path d="M14 321l6 4.5-2.3 7h-7.4l-2.3-7z"/>
+              <!-- Texto A -->
+              <text x="14" y="362" text-anchor="middle" fill="#cfcfcf" stroke="none" font-family="Segoe UI,Arial" font-weight="700" font-size="14">A</text>
+              <!-- Dimensão Paralela -->
+              <path d="M8 389l11-11m-11 7l4 4m4-11l4 4"/>
+              <!-- Conector -->
+              <path d="M9 406h5v8h5"/><rect x="7" y="404" width="3" height="3" fill="#cfcfcf"/><rect x="18" y="413" width="3" height="3" fill="#cfcfcf"/>
+              <!-- Sombra -->
+              <rect x="10" y="432" width="10" height="8" fill="#555" stroke="none"/><rect x="7" y="429" width="10" height="8" fill="#262626"/>
+              <!-- Transparência (xadrez) -->
+              <rect x="7" y="455" width="13" height="11"/>
+              <rect x="7" y="455" width="4" height="4" fill="#cfcfcf" stroke="none"/><rect x="15" y="455" width="4" height="4" fill="#cfcfcf" stroke="none"/><rect x="11" y="459" width="4" height="4" fill="#cfcfcf" stroke="none"/><rect x="7" y="462" width="4" height="4" fill="#cfcfcf" stroke="none"/><rect x="15" y="462" width="4" height="4" fill="#cfcfcf" stroke="none"/>
+              <!-- Conta-gotas -->
+              <path d="M8 492l8-8 3 3-8 8-4 1z"/><path d="M15 482l4 4"/>
+              <!-- Preenchimento interativo (Balde) -->
+              <path d="M8 512l6-5 5 5-6 6z"/><path d="M20 516c1.5 2 1.5 4 0 4s-1.5-2 0-4z" fill="#cfcfcf"/>
+              <!-- Preenchimento inteligente -->
+              <path d="M10 538c2-6 6-6 8 0s-4 8-8 0z"/>
+            </g>
+            <!-- Triângulos de submenu da caixa de ferramentas -->
+            <g fill="#8c8c8c">
+              <polygon points="24,122 21,122 24,119"/><polygon points="24,148 21,148 24,145"/><polygon points="24,174 21,174 24,171"/><polygon points="24,200 21,200 24,197"/><polygon points="24,227 21,227 24,224"/><polygon points="24,254 21,254 24,251"/><polygon points="24,281 21,281 24,278"/><polygon points="24,309 21,309 24,306"/><polygon points="24,336 21,336 24,333"/><polygon points="24,365 21,365 24,362"/><polygon points="24,392 21,392 24,389"/><polygon points="24,419 21,419 24,416"/><polygon points="24,445 21,445 24,442"/><polygon points="24,471 21,471 24,468"/><polygon points="24,497 21,497 24,494"/><polygon points="24,523 21,523 24,520"/>
+            </g>
+            <text x="14" y="575" text-anchor="middle" fill="#cfcfcf" font-size="15" font-family="Segoe UI,Arial">+</text>
+
+            <!-- 6. Réguas Métricas (Horizontal e Vertical) -->
+            <rect x="28" y="122" width="1066" height="18" fill="#262626"/>
+            <rect x="28" y="140" width="18" height="410" fill="#262626"/>
+            <rect x="46" y="122" width="1048" height="18" fill="url(#tk)"/><rect x="46" y="122" width="1048" height="18" fill="url(#tkM)"/>
+            <rect x="28" y="140" width="18" height="410" fill="url(#tkv)"/><rect x="28" y="140" width="18" height="410" fill="url(#tkvM)"/>
+            <!-- Números da régua horizontal (-150 a 400 ...milímetros) -->
+            <g fill="#b8b8b8" font-size="8.5" font-family="Segoe UI,Arial">
+              <text x="86" y="132">-150</text>
+              <text x="179" y="132">-100</text>
+              <text x="273" y="132">-50</text>
+              <text x="366" y="132">0</text>
+              <text x="460" y="132">50</text>
+              <text x="553" y="132">100</text>
+              <text x="647" y="132">150</text>
+              <text x="740" y="132">200</text>
+              <text x="834" y="132">250</text>
+              <text x="927" y="132">300</text>
+              <text x="1021" y="132">350</text>
+              <text x="1044" y="132" fill="#8f8f8f">...milímetros</text>
+            </g>
+            <!-- Números da régua vertical (200, 150, 100, 50, milímetros) -->
+            <g fill="#b8b8b8" font-size="8.5" font-family="Segoe UI,Arial">
+              <text x="39" y="192" transform="rotate(-90 39 192)">200</text>
+              <text x="39" y="285" transform="rotate(-90 39 285)">150</text>
+              <text x="39" y="378" transform="rotate(-90 39 378)">100</text>
+              <text x="39" y="472" transform="rotate(-90 39 472)">50</text>
+              <text x="39" y="542" transform="rotate(-90 39 542)">milímetros</text>
+            </g>
+
+            <!-- 7. Canvas editável: 100% SVG, não é uma captura nem imagem -->
+            <g clip-path="url(#cv)" id="cdWorkspaceClip">
+              <rect class="cd-workspace" x="46" y="140" width="1048" height="410" fill="#3b3b3b"/>
+              <g id="cdViewport">
+                <rect id="cdPage" x="362" y="168" width="520" height="348" fill="#ffffff" filter="url(#ps)"/>
+                <g id="cdObjects"></g>
+                <g id="cdPreview" pointer-events="none"></g>
+                <g id="cdSelection"></g>
+              </g>
+            </g>
+
+            <!-- Barras de rolagem discretas do canvas -->
+            <rect x="1084" y="140" width="10" height="400" fill="#2c2c2c"/>
+            <rect x="1085" y="190" width="8" height="270" rx="4" fill="#595959"/>
+            <rect x="46" y="540" width="1038" height="10" fill="#2c2c2c"/>
+            <rect x="290" y="541" width="520" height="8" rx="4" fill="#595959"/>
+
+            <!-- 8. Paleta de Cores Vertical Direita -->
+            <rect x="1094" y="97" width="26" height="495" fill="#262626"/>
+            <line x1="1094" y1="97" x2="1094" y2="592" stroke="#171717"/>
+            <!-- Amostra "Sem Cor" (Branco com traço vermelho) -->
+            <rect x="1099" y="124" width="16" height="12" fill="#ffffff" stroke="#555" stroke-width=".8"/>
+            <line x1="1099" y1="136" x2="1115" y2="124" stroke="#e53935" stroke-width="1.3"/>
+            <!-- Amostras de cor geradas via JS (#pal) -->
+            <g id="pal"></g>
+
+            <!-- 9. Rodapé Triplo (Navegador de Páginas + Paleta do Documento + Barra de Status) -->
+            <!-- 9a. Barra de Páginas (1 de 1 | Página 1) -->
+            <rect x="28" y="550" width="1066" height="20" fill="#262626"/>
+            <line x1="28" y1="550" x2="1094" y2="550" stroke="#171717"/>
+            <g fill="#b8b8b8" font-size="9.5" font-family="Segoe UI,Arial">
+              <text x="36" y="564">⊕</text>
+              <text x="52" y="564">⊖</text>
+              <text x="68" y="564">|◀</text>
+              <text x="84" y="564">◀</text>
+              <text x="98" y="564" fill="#dcdcdc">1 de 1</text>
+              <text x="132" y="564">▶</text>
+              <text x="145" y="564">▶|</text>
+              <text x="163" y="564">⊕</text>
+            </g>
+            <rect x="178" y="551" width="76" height="18" fill="#1d4f7a"/>
+            <text x="216" y="563.5" text-anchor="middle" fill="#ffffff" font-size="9.5" font-family="Segoe UI,Arial">Página 1</text>
+
+            <!-- 9b. Faixa da Paleta do Documento -->
+            <rect x="28" y="570" width="1066" height="22" fill="#222222"/>
+            <line x1="28" y1="570" x2="1094" y2="570" stroke="#161616"/>
+            <text x="34" y="584" fill="#888" font-size="10" font-family="Segoe UI,Arial">⋮⋮  ›  🖌  ‹</text>
+            <!-- Sem cor + 5 amostras do documento demo.cloud -->
+            <rect x="86" y="574" width="14" height="14" fill="#ffffff" stroke="#555"/>
+            <line x1="86" y1="588" x2="100" y2="574" stroke="#e53935" stroke-width="1.3"/>
+            <rect x="102" y="574" width="14" height="14" fill="#1b2436" stroke="#444"/>
+            <rect x="118" y="574" width="14" height="14" fill="#e8eef7" stroke="#444"/>
+            <rect x="134" y="574" width="14" height="14" fill="#8b9bb4" stroke="#444"/>
+            <rect x="150" y="574" width="14" height="14" fill="#4658e8" stroke="#444"/>
+            <rect x="166" y="574" width="14" height="14" fill="#ffffff" stroke="#444"/>
+
+            <!-- 9c. Barra de Status Inferior (⚙ Aberto: demo.cloud ... Nenhum | C:0 M:0 Y:0 K:100 0,200 mm) -->
+            <rect y="592" width="1120" height="28" fill="#1f1f1f"/>
+            <line x1="0" y1="592" x2="1120" y2="592" stroke="#121212"/>
+            <circle cx="14" cy="606" r="4" stroke="#b8b8b8" stroke-width="1.4" fill="none"/>
+            <text x="26" y="610" fill="#d4d4d4" font-size="10.5" font-family="Segoe UI,Arial">Aberto: demo.cloud</text>
+
+            <!-- Indicadores de Preenchimento e Contorno à direita no rodapé -->
+            <path d="M754 608l5-5 4 4-5 5z" fill="none" stroke="#cfcfcf" stroke-width="1.2"/>
+            <rect x="768" y="599" width="14" height="14" fill="#ffffff" stroke="#555"/>
+            <line x1="768" y1="613" x2="782" y2="599" stroke="#e53935" stroke-width="1.3"/>
+            <text x="796" y="610" fill="#cfcfcf" font-size="10" font-family="Segoe UI,Arial">Nenhum</text>
+
+            <path d="M884 611l3-9 3 9-3 2z" fill="none" stroke="#cfcfcf" stroke-width="1.2"/>
+            <rect x="896" y="599" width="14" height="14" fill="#000000" stroke="#666"/>
+            <text x="920" y="610" fill="#cfcfcf" font-size="10" font-family="Segoe UI,Arial">C:0 M:0 Y:0 K:100   0,200 mm</text>
+            <g id="cdToolHighlight" pointer-events="none"><rect id="cdToolActive" x="2" y="100" width="24" height="24" rx="3" fill="#1b6ec2" fill-opacity=".30" stroke="#67beff" stroke-width="1.3"/></g>
+            <g id="cdTools" aria-label="Ferramentas interativas">
+              <rect class="cd-tool-hotspot" data-cd-tool="select" x="1" y="100" width="25" height="25" fill="transparent"><title>Selecionar e mover (V)</title></rect>
+              <rect class="cd-tool-hotspot" data-cd-tool="hand" x="1" y="126" width="25" height="25" fill="transparent"><title>Mover a vista (H)</title></rect>
+              <rect class="cd-tool-hotspot" data-cd-tool="zoom" x="1" y="179" width="25" height="24" fill="transparent"><title>Zoom: clique para aproximar; Shift+clique para afastar (Z)</title></rect>
+              <rect class="cd-tool-hotspot" data-cd-tool="pen" x="1" y="208" width="25" height="25" fill="transparent"><title>Caneta: arraste para criar uma linha</title></rect>
+              <rect class="cd-tool-hotspot" data-cd-tool="brush" x="1" y="235" width="25" height="25" fill="transparent"><title>Pincel: desenhe à mão livre (B)</title></rect>
+              <rect class="cd-tool-hotspot" data-cd-tool="rect" x="1" y="262" width="25" height="24" fill="transparent"><title>Retângulo (R)</title></rect>
+              <rect class="cd-tool-hotspot" data-cd-tool="ellipse" x="1" y="288" width="25" height="25" fill="transparent"><title>Elipse (E)</title></rect>
+              <rect class="cd-tool-hotspot" data-cd-tool="text" x="1" y="345" width="25" height="27" fill="transparent"><title>Texto: clique na página para inserir</title></rect>
+            </g>
+          </svg>
+        </div>
+        <div class="cd-demo-hint"><div><b id="cdToolLabel">Seleção ativa</b> · <span id="cdHint">Clique nos elementos da folha para mover e redimensionar pelas alças.</span></div><span>Roda do mouse: zoom · arrastar com botão do meio: mover vista</span></div>
+        <div class="mock-glow"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-t">
+    <span>Bézier</span><span>Caneta</span><span>B-spline</span><span>Edição de nós</span><span>Faca</span><span>Borracha</span><span>Mistura</span><span>Envelope</span><span>Extrusão</span><span>Sombra</span><span>Transparência</span><span>Conta-gotas</span><span>PowerClip</span><span>Conector</span><span>Dimensões</span><span>Polígonos e estrelas</span><span>Espirais</span>
+    <span>Bézier</span><span>Caneta</span><span>B-spline</span><span>Edição de nós</span><span>Faca</span><span>Borracha</span><span>Mistura</span><span>Envelope</span><span>Extrusão</span><span>Sombra</span><span>Transparência</span><span>Conta-gotas</span><span>PowerClip</span><span>Conector</span><span>Dimensões</span><span>Polígonos e estrelas</span><span>Espirais</span>
+  </div>
+</div>
+
+<!-- RECURSOS -->
+<section id="recursos">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="eyebrow">Recursos</div>
+      <h2>Ferramentas de verdade,<br><span class="grad">sem enrolação</span></h2>
+      <p class="lead">Uma caixa de ferramentas completa para ilustração, logotipos e layouts, com o fluxo de trabalho familiar de quem vem do mundo do desenho vetorial.</p>
+    </div>
+
+    <div class="grid">
+      <article class="card reveal">
+        <div class="art"><svg viewBox="0 0 160 90" fill="none">
+          <path class="draw" pathLength="1" d="M15 72C40 4 100 4 145 62" stroke="#4fd18b" stroke-width="3" stroke-linecap="round"/>
+          <path d="M15 72L40 4M145 62L100 4" stroke="#4ea1ff" stroke-width="1"/>
+          <circle cx="40" cy="4" r="3.5" fill="#4ea1ff"/><circle cx="100" cy="4" r="3.5" fill="#4ea1ff"/>
+          <rect x="10" y="67" width="9" height="9" fill="#fff"/><rect x="140" y="57" width="9" height="9" fill="#fff"/>
+        </svg></div>
+        <h3>Bézier, Caneta e B-spline</h3>
+        <p>Curvas precisas com alças de controle. Desenhe à mão livre, por pontos ou com splines suaves.</p>
+      </article>
+
+      <article class="card reveal" style="--d:.08s">
+        <div class="art"><svg viewBox="0 0 160 90" fill="none">
+          <path class="draw" pathLength="1" d="M14 70L48 28L84 62L118 22L148 54" stroke="#4fd18b" stroke-width="2.5" stroke-linejoin="round"/>
+          <g fill="#fff" stroke="#000" stroke-width="1"><rect x="9" y="65" width="10" height="10"/><rect x="43" y="23" width="10" height="10"/><rect x="79" y="57" width="10" height="10"/><rect x="143" y="49" width="10" height="10"/></g>
+          <rect x="113" y="17" width="10" height="10" fill="#4ea1ff" stroke="#fff" stroke-width="1.2" class="bob"/>
+        </svg></div>
+        <h3>Edição de nós</h3>
+        <p>Adicione, mova, converta e remova nós. Controle total sobre cada segmento da curva.</p>
+      </article>
+
+      <article class="card reveal" style="--d:.16s">
+        <div class="art"><svg viewBox="0 0 160 90" fill="none">
+          <rect x="12" y="24" width="38" height="38" rx="5" fill="#4ea1ff" opacity=".85"/>
+          <circle cx="74" cy="43" r="19" fill="#4fd18b" opacity=".9"/>
+          <path class="spin" d="M120 20l5.9 14.5 15.6 1.2-11.9 10.1 3.7 15.2-13.3-8.2-13.3 8.2 3.7-15.2-11.9-10.1 15.6-1.2z" fill="#ffc457"/>
+        </svg></div>
+        <h3>Formas e polígonos</h3>
+        <p>Retângulos, elipses, polígonos, estrelas e espirais, com contorno e preenchimento editáveis.</p>
+      </article>
+
+      <article class="card reveal">
+        <div class="art"><svg viewBox="0 0 160 90">
+          <circle cx="22" cy="45" r="7" fill="#4fd18b"/><circle cx="48" cy="45" r="10" fill="#46c2a6"/><circle cx="78" cy="45" r="13" fill="#3eb3c2"/><circle cx="112" cy="45" r="16" fill="#4a9fe0"/><circle cx="145" cy="45" r="11" fill="#5b87f5"/>
+        </svg></div>
+        <h3>Mistura, envelope e extrusão</h3>
+        <p>Efeitos interativos para transições suaves, distorções de forma e profundidade 3D.</p>
+      </article>
+
+      <article class="card reveal" style="--d:.08s">
+        <div class="art"><svg viewBox="0 0 160 90">
+          <defs>
+            <linearGradient id="fa" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fd18b"/><stop offset="1" stop-color="#4ea1ff"/></linearGradient>
+            <radialGradient id="fb"><stop offset="0" stop-color="#ffe29a"/><stop offset="1" stop-color="#ff6f6f"/></radialGradient>
+            <pattern id="fc" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="5" height="5" fill="#2f4a40"/><rect x="5" y="5" width="5" height="5" fill="#2f4a40"/><rect x="5" width="5" height="5" fill="#6fe0a3"/><rect y="5" width="5" height="5" fill="#6fe0a3"/></pattern>
+          </defs>
+          <rect x="10" y="16" width="42" height="58" rx="8" fill="url(#fa)"/>
+          <rect x="59" y="16" width="42" height="58" rx="8" fill="url(#fb)"/>
+          <rect x="108" y="16" width="42" height="58" rx="8" fill="url(#fc)"/>
+        </svg></div>
+        <h3>Preenchimentos e transparência</h3>
+        <p>Degradês lineares e radiais, textura bitmap e canal alfa para acabamentos profissionais.</p>
+      </article>
+
+      <article class="card reveal" style="--d:.16s">
+        <div class="art"><svg viewBox="0 0 160 90" fill="none">
+          <defs><clipPath id="pc"><circle cx="80" cy="45" r="32"/></clipPath>
+            <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fd18b"/><stop offset="1" stop-color="#4ea1ff"/></linearGradient></defs>
+          <g opacity=".2"><rect x="30" y="20" width="100" height="50" fill="url(#pg)"/></g>
+          <g clip-path="url(#pc)"><rect x="30" y="20" width="100" height="50" fill="url(#pg)"><animate attributeName="x" values="30;50;30" dur="5s" repeatCount="indefinite"/></rect></g>
+          <circle cx="80" cy="45" r="32" stroke="#fff" stroke-dasharray="4 4" stroke-width="1.5"/>
+        </svg></div>
+        <h3>PowerClip</h3>
+        <p>Coloque objetos dentro de qualquer forma e reposicione o conteúdo sem perder o recorte.</p>
+      </article>
+
+      <article class="card reveal">
+        <div class="art"><svg viewBox="0 0 160 90" fill="none">
+          <defs><path id="tp" d="M14 66C44 8 106 8 146 62"/><linearGradient id="tg" x1="0" x2="1"><stop offset="0" stop-color="#4fd18b"/><stop offset="1" stop-color="#4ea1ff"/></linearGradient></defs>
+          <path d="M14 66C44 8 106 8 146 62" stroke="#4ea1ff" stroke-opacity=".5" stroke-dasharray="3 3"/>
+          <text font-family="Segoe UI,Arial" font-weight="800" font-size="22" fill="url(#tg)" letter-spacing="1"><textPath href="#tp" startOffset="50%" text-anchor="middle">CloudDraw</textPath></text>
+        </svg></div>
+        <h3>Texto artístico</h3>
+        <p>Digite direto na tela com a ferramenta Texto ou com duplo clique e converta em curvas quando quiser.</p>
+      </article>
+
+      <article class="card reveal" style="--d:.08s">
+        <div class="art"><svg viewBox="0 0 160 90" fill="none">
+          <rect x="22" y="14" width="124" height="64" fill="#0b1310" stroke="#2f4a40"/>
+          <g stroke="#5d756a"><path d="M22 10v4M34 12v2M46 12v2M58 12v2M70 12v2M82 10v4M94 12v2M106 12v2M118 12v2M130 12v2M142 10v4"/><path d="M18 14h4M20 26h2M20 38h2M18 50h4M20 62h2M20 74h2"/></g>
+          <path d="M82 14v64" stroke="#ff6fa8" stroke-dasharray="3 3"/><path d="M22 50h124" stroke="#4ea1ff" stroke-dasharray="3 3"/>
+          <circle cx="82" cy="50" r="5" fill="none" stroke="#4fd18b" stroke-width="2"><animate attributeName="r" values="3;8;3" dur="2.2s" repeatCount="indefinite"/></circle>
+          <circle cx="82" cy="50" r="2.5" fill="#4fd18b"/>
+        </svg></div>
+        <h3>Réguas, guias e snapping</h3>
+        <p>Réguas adaptativas, guias por arraste com posição editável e ímã de precisão.</p>
+      </article>
+
+      <article class="card reveal" style="--d:.16s">
+        <div class="art"><svg viewBox="0 0 160 90" fill="none">
+          <path d="M26 14h32l14 14v48H26z" fill="#142620" stroke="#4fd18b" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M58 14v14h14" stroke="#4fd18b" stroke-width="2"/>
+          <text x="49" y="60" text-anchor="middle" font-family="Segoe UI,Arial" font-weight="800" font-size="14" fill="#4fd18b">CDR</text>
+          <path d="M82 50h26" stroke="#8fa99d" stroke-width="2" stroke-dasharray="4 4"><animate attributeName="stroke-dashoffset" values="8;0" dur=".8s" repeatCount="indefinite"/></path>
+          <path d="M104 44l8 6-8 6" stroke="#8fa99d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="132" cy="38" r="9" fill="#4ea1ff"/><rect x="122" y="52" width="20" height="14" rx="3" fill="#4fd18b"/>
+        </svg></div>
+        <h3>Abre arquivos CDR</h3>
+        <p>Leitura de páginas, camadas e objetos de arquivos CorelDRAW, além de importar SVG, PNG e JPG.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- BÉZIER LAB -->
+<section id="bezier">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Experimente agora</div>
+      <h2>A curva Bézier,<br><span class="grad">na ponta dos dedos</span></h2>
+      <p class="lead">Arraste os pontos e veja a curva reagir. Os quadrados são os nós, os círculos azuis são as alças de controle, e o gráfico mostra como a curva é construída.</p>
+    </div>
+    <div class="lab reveal">
+      <div class="lab-canvas">
+        <div class="lab-top"><i></i><i></i><i></i><span>Editor de nós — demo interativa</span></div>
+        <svg id="bz" viewBox="0 0 600 360" aria-label="Demonstração interativa de curva Bézier cúbica"></svg>
+      </div>
+      <div class="lab-side">
+        <div>
+          <h3>Bézier cúbica</h3>
+          <p style="margin-top:8px">Quatro pontos definem a curva: dois nós (início e fim) e duas alças que controlam a direção e a tensão. É a base de todo desenho vetorial.</p>
+        </div>
+        <div class="ctrl">
+          <div class="row"><label for="tR">Parâmetro t</label><span id="tVal" style="font-family:var(--mono);font-size:13px">0.50</span></div>
+          <input type="range" id="tR" min="0" max="100" value="50">
+          <div class="row"><label for="aN">Animar t</label><span class="switch"><input type="checkbox" id="aN" checked><i></i></span></div>
+          <div class="row"><label for="cS">Mostrar construção (De Casteljau)</label><span class="switch"><input type="checkbox" id="cS" checked><i></i></span></div>
+        </div>
+        <code class="out" id="bzOut"></code>
+        <div class="hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5a2 2 0 1 1 4 0v6m0 0V9a2 2 0 1 1 4 0v5a7 7 0 0 1-7 7H9a5 5 0 0 1-4-2l-2-3a2 2 0 0 1 3-2l1 1V8a2 2 0 1 1 4 0"/></svg>Arraste qualquer ponto para remodelar a curva.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CDR -->
+<section id="cdr">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="eyebrow">Suporte a CDR</div>
+      <h2>Do arquivo <span class="grad">.cdr</span> à tela</h2>
+      <p class="lead">O CloudDraw lê a estrutura dos arquivos CDR e reconstrói páginas, camadas e objetos, validado contra arquivos gerados pelo próprio CorelDRAW.</p>
+    </div>
+
+    <div class="pipe">
+      <div class="step reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#1e824c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></div>
+        <b>Arquivo CDR</b><small>Detecção de contêiner RIFF ou ZIP</small>
+      </div>
+      <div class="step reveal" style="--d:.1s">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#1b6ec2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div>
+        <b>Blocos de dados</b><small>Dados externos e blocos comprimidos</small>
+      </div>
+      <div class="step reveal" style="--d:.2s">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#1e824c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></div>
+        <b>Páginas</b><small>Dimensões e orientação</small>
+      </div>
+      <div class="step reveal" style="--d:.3s">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#1b6ec2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17l9 5 9-5" opacity=".5"/></svg></div>
+        <b>Camadas</b><small>Estrutura e ordem de empilhamento</small>
+      </div>
+      <div class="step reveal" style="--d:.4s">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#1e824c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="4"/><rect x="12" y="12" width="8" height="8" rx="1.5"/><path d="M4 20c1-4 4-5 6-4"/></svg></div>
+        <b>Objetos</b><small>Curvas, formas, bitmaps e texto</small>
+      </div>
+    </div>
+
+    <div class="stats reveal">
+      <div class="stat"><b class="grad" data-count="18">0</b><span>casos básicos de CDR validados</span></div>
+      <div class="stat"><b class="grad" data-count="14">0</b><span>casos avançados validados</span></div>
+      <div class="stat"><b class="grad" data-count="96">0</b><span>ícones vetoriais próprios</span></div>
+      <div class="stat"><b class="grad" data-count="17">0</b><span>grupos de ferramentas</span></div>
+      <div class="stat"><b class="grad" data-count="13">0</b><span>menus completos</span></div>
+      <div class="stat"><b class="grad" data-count="64">0</b><span>estados de desfazer</span></div>
+    </div>
+
+    <div class="note reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <div>A compatibilidade com CDR está em evolução. PowerClip, rotação de bitmaps, preenchimentos lineares e radiais, textura bitmap, alfa e origem de desenho já receberam correções, mas uma leitura estrutural perfeita não garante fidelidade visual completa em todos os arquivos.</div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERFACE -->
+<section id="interface">
+  <div class="wrap ui-grid">
+    <div class="reveal">
+      <div class="eyebrow">Interface</div>
+      <h2>Familiar desde<br><span class="grad">o primeiro clique</span></h2>
+      <p class="lead">Seleção com pré-visualização azul, alças de redimensionamento, menus de contexto, paleta lateral e atalhos de teclado no lugar em que você espera encontrá-los.</p>
+      <ul class="checks">
+        <li><span><b>Paleta lateral:</b> clique esquerdo preenche, clique direito aplica contorno.</span></li>
+        <li><span><b>Zoom ancorado no mouse</b> com a roda, e vista pelo botão central.</span></li>
+        <li><span><b>Arrastar e soltar:</b> SVG vira curvas editáveis, PNG e JPG viram bitmaps.</span></li>
+        <li><span><b>Formato próprio .cloud</b> e exportação para SVG.</span></li>
+      </ul>
+    </div>
+    <div class="reveal" style="--d:.12s">
+      <p class="keys-title">Atalhos principais</p>
+      <div class="keys">
+        <div class="key">Abrir <kbd>Ctrl + O</kbd></div>
+        <div class="key">Salvar como <kbd>Ctrl + S</kbd></div>
+        <div class="key">Importar <kbd>Ctrl + I</kbd></div>
+        <div class="key">Converter em curvas <kbd>Ctrl + Q</kbd></div>
+        <div class="key">Duplicar <kbd>Ctrl + D</kbd></div>
+        <div class="key">Desfazer <kbd>Ctrl + Z</kbd></div>
+        <div class="key">Colar na vista <kbd>Ctrl + Shift + V</kbd></div>
+        <div class="key">Ajustar a folha <kbd>F4</kbd></div>
+        <div class="key">Ordenar objetos <kbd>Ctrl + PgUp/PgDn</kbd></div>
+        <div class="key">Cancelar <kbd>Esc</kbd></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section style="padding-top:20px">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="eyebrow">Por baixo do capô</div>
+      <h2>Nativo, leve e <span class="grad">independente</span></h2>
+    </div>
+    <div class="tech">
+      <div class="card reveal"><h3>Feito em Rust</h3><p>Desempenho nativo e segurança de memória, sem navegador embutido.</p></div>
+      <div class="card reveal" style="--d:.08s"><h3>Renderização OpenGL</h3><p>Interface com egui/eframe acelerada por GPU para um canvas fluido.</p></div>
+      <div class="card reveal" style="--d:.16s"><h3>Formatos abertos</h3><p>Salve em .cloud (JSON versionado) e exporte SVG limpo.</p></div>
+      <div class="card reveal" style="--d:.24s"><h3>Código próprio</h3><p>Implementação independente: ícones, interface e código são do CloudDraw.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="wrap">
+    <div class="dl reveal">
+      <svg class="dl-logo"><use href="#logo"/></svg>
+      <h2>Baixe o <span class="grad">CloudDraw</span></h2>
+      <p class="lead">Estamos finalizando a primeira versão pública. Em breve o download estará disponível aqui.</p>
+      <div class="cta">
+        <a href="#download" class="btn primary" data-download id="dlMain">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
+          Download para Windows <span class="pill" data-soon>Em breve</span>
+        </a>
+      </div>
+      <div class="dl-meta">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Aplicativo desktop nativo</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sem navegador embutido</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Abre arquivos CDR, SVG, PNG e JPG</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <a href="#top" class="brand"><svg><use href="#logo"/></svg>CloudDraw</a>
+      <p style="margin-top:12px">© <span id="yr"></span> CloudDraw. Todos os direitos reservados.</p>
+    </div>
+    <p>O CloudDraw é uma implementação independente e não usa nem redistribui DLLs, ícones ou código do CorelDRAW. CorelDRAW e CDR são marcas de seus respectivos proprietários; este projeto não é afiliado a eles nem endossado por eles.</p>
+  </div>
+</footer>
+
+<div id="toast" role="status" aria-live="polite">O download estará disponível em breve.</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DO DOWNLOAD
+   Quando tiver o link, é só colocar aqui embaixo.
+   Ex.: const DOWNLOAD_URL = "https://seusite.com/CloudDraw-Setup.exe";
+   Enquanto estiver vazio, todos os botões mostram "Em breve".
+   ============================================================ */
+const DOWNLOAD_URL = "";
+
+(function(){
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* download buttons */
+  const toast=$('#toast'); let tt;
+  function showToast(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('show'),2600)}
+  $$('[data-download]').forEach(a=>{
+    if(DOWNLOAD_URL){a.href=DOWNLOAD_URL;a.setAttribute('download','');$$('[data-soon]',a).forEach(p=>p.remove())}
+    else a.addEventListener('click',e=>{
+      const inDl=a.closest('#download');
+      if(!inDl){return}            // leva até a seção de download
+      e.preventDefault();showToast('O download estará disponível em breve.');
+    });
+  });
+
+  $('#yr').textContent=new Date().getFullYear();
+
+  /* nav + progress */
+  const nav=$('#nav'),prog=$('#prog');
+  function onScroll(){
+    const y=scrollY,h=document.documentElement.scrollHeight-innerHeight;
+    nav.classList.toggle('scrolled',y>20);
+    prog.style.transform='scaleX('+(h>0?y/h:0)+')';
+  }
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  /* reveal + counters */
+  function count(el){
+    const to=+el.dataset.count,d=1300,t0=performance.now();
+    (function f(t){const p=Math.min(1,(t-t0)/d);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0);
+  }
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(!e.isIntersecting)return;
+      e.target.classList.add('in');
+      $$('[data-count]',e.target).forEach(count);
+      io.unobserve(e.target);
+    });
+  },{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+  $$('.reveal').forEach(el=>io.observe(el));
+  if(reduce)$$('[data-count]').forEach(el=>el.textContent=el.dataset.count);
+
+  /* glow nos cards seguindo o mouse */
+  $$('.card').forEach(c=>c.addEventListener('pointermove',e=>{
+    const r=c.getBoundingClientRect();
+    c.style.setProperty('--mx',(e.clientX-r.left)+'px');
+    c.style.setProperty('--my',(e.clientY-r.top)+'px');
+  }));
+
+  /* paleta lateral direita do mockup (escala de cinzas + cores vibrantes como na captura real) */
+  const pal=$('#pal'),cols=[
+    '#141414','#2e2e2e','#484848','#636363','#7d7d7d','#969696','#b0b0b0','#cacaca','#e3e3e3','#ffffff',
+    '#0047ab','#0088cc','#00a859','#ffe600','#ff2a00','#d40078','#ff6600','#662d91','#8c6239','#4658e8',
+    '#7986cb','#9fa8da','#c5cae9','#00acc1','#26a69a','#66bb6a','#9ccc65','#d4e157','#ffee58','#ffa726'
+  ];
+  const NS='http://www.w3.org/2000/svg';
+  cols.forEach((c,i)=>{const r=document.createElementNS(NS,'rect');r.setAttribute('x',1099);r.setAttribute('y',138+i*13.5);r.setAttribute('width',16);r.setAttribute('height',12);r.setAttribute('fill',c);pal.appendChild(r)});
+  if(reduce){try{$('#mockSvg').pauseAnimations()}catch(e){}}
+
+  /* ============================================================
+     CLOUDDRAW — MINI EDITOR 100% SVG (somente esta prévia)
+     Selecione, mova, redimensione, desenhe e use as cores.
+     Não interfere no editor Rust, nem envia dados para servidores.
+     ============================================================ */
+  (function cloudDrawDemo(){
+    const root=$('#mockSvg');
+    const viewport=$('#cdViewport'), layer=$('#cdObjects');
+    const preview=$('#cdPreview'), selectionLayer=$('#cdSelection');
+    const zoomLabel=$('#cdZoomValue'), toolLabel=$('#cdToolLabel'), hint=$('#cdHint');
+    const activeRect=$('#cdToolActive'), originalSelectBG=root.querySelector('rect[x="2"][y="100"][fill="#1b6ec2"]');
+    const svgNS='http://www.w3.org/2000/svg';
+    const page={x:362,y:168,w:520,h:348};
+    const workspace={x:46,y:140,w:1048,h:410};
+    let tool='select',color='#4658e8',selected='circle';
+    let zoom=1,panX=0,panY=0;
+    let items=[], counter=0, drag=null, usingSpace=false;
+    let timeline=[], at=0;
+    const toolY={select:100,hand:126,zoom:179,pen:208,brush:235,rect:262,ellipse:288,text:345};
+    const toolNames={select:'Seleção ativa',hand:'Mover a vista',zoom:'Lupa ativa',pen:'Caneta ativa',brush:'Pincel ativo',rect:'Retângulo ativo',ellipse:'Elipse ativa',text:'Texto ativo'};
+    const toolHints={
+      select:'Clique em qualquer objeto para mover. Arraste uma das 8 alças para redimensionar.',
+      hand:'Arraste o fundo cinza ou a folha para deslocar a visualização.',
+      zoom:'Clique na folha para aproximar; Shift + clique para afastar.',
+      pen:'Clique e arraste para criar uma linha reta. Use a paleta para trocar a cor.',
+      brush:'Clique e arraste para desenhar com o pincel.',
+      rect:'Clique e arraste na folha para criar um retângulo.',
+      ellipse:'Clique e arraste na folha para criar um círculo ou elipse.',
+      text:'Clique na folha para inserir um texto de exemplo.'
+    };
+    const colorable=(item)=>item && ['rect','ellipse','button','background','circle','line','brush','path','banner'].includes(item.type);
+    function node(tag,attrs={},parent){
+      const e=document.createElementNS(svgNS,tag);
+      for(const [name,val] of Object.entries(attrs))e.setAttribute(name,String(val));
+      if(parent)parent.appendChild(e);
+      return e;
+    }
+    const uid=()=>`cd_${++counter}`;
+    const initial=()=>[
+      {id:'backdrop',type:'background',x:404,y:212,w:436,h:260,fill:'#edf1f8'},
+      {id:'dash',type:'rect',x:436,y:248,w:24,h:5,fill:'#4658e8'},
+      {id:'headline',type:'headline',x:436,y:276,w:241,h:26,fill:'#1e2433'},
+      {id:'subline',type:'subline',x:436,y:313,w:247,h:21,fill:'#687792'},
+      {id:'button',type:'button',x:436,y:386,w:108,h:29,fill:'#4658e8'},
+      {id:'circle',type:'circle',x:698,y:242,w:100,h:100,fill:'#4658e8'},
+      {id:'curve',type:'path',x:436,y:345,w:376,h:115,fill:'none',stroke:'#1e824c',strokeWidth:3.2}
+    ];
+    const deepCopy=o=>JSON.parse(JSON.stringify(o));
+    const snapshot=()=>JSON.stringify(items);
+    function remember(){
+      const state=snapshot();
+      if(timeline[at]===state)return;
+      timeline=timeline.slice(0,at+1);timeline.push(state);
+      if(timeline.length>40)timeline.shift();
+      at=timeline.length-1;
+    }
+    function restore(redo){
+      let n=at+(redo?1:-1);
+      if(n<0||n>=timeline.length)return;
+      at=n;items=JSON.parse(timeline[at]);
+      if(!items.some(x=>x.id===selected))selected=null;
+      render();
+    }
+    function setup(){
+      items=initial();selected='circle';zoom=1;panX=0;panY=0;counter=0;tool='select';
+      timeline=[snapshot()];at=0;setTool('select');render();
+    }
+    function current(){return items.find(x=>x.id===selected)}
+    function renderObject(item){
+      const g=node('g',{'class':'cd-object','data-cd-id':item.id,transform:`translate(${item.x} ${item.y})`},layer);
+      const w=Math.max(1,item.w),h=Math.max(1,item.h);
+      const shape=(tag,attrs)=>node(tag,{...attrs,'pointer-events':'visiblePainted'},g);
+      if(item.type==='background'||item.type==='rect'){
+        shape('rect',{x:0,y:0,width:w,height:h,fill:item.fill||'#4658e8',stroke:item.stroke||'none','stroke-width':item.strokeWidth||1});
+      }else if(item.type==='circle'||item.type==='ellipse'){
+        shape('ellipse',{cx:w/2,cy:h/2,rx:w/2,ry:h/2,fill:item.fill||'#4658e8',stroke:item.stroke||'none','stroke-width':item.strokeWidth||1});
+      }else if(item.type==='headline'||item.type==='subline'){
+        const baseW=item.type==='headline'?241:247;
+        const baseH=item.type==='headline'?26:21;
+        const inner=node('g',{transform:`scale(${w/baseW} ${h/baseH})`},g);
+        const e=node('text',{x:0,y:item.type==='headline'?20:15,fill:item.fill,'font-size':item.type==='headline'?18.5:9.8,'font-weight':item.type==='headline'?600:400,'font-family':'Segoe UI,Arial,sans-serif'},inner);
+        e.textContent=item.text || (item.type==='headline'?'Ideias ganham forma.':'Seu novo espaço para criar vetores.');
+      }else if(item.type==='text'){
+        const inner=node('g',{transform:`scale(${w/165} ${h/28})`},g);
+        const e=node('text',{x:0,y:23,fill:item.fill,'font-size':22,'font-weight':600,'font-family':'Segoe UI,Arial,sans-serif'},inner);
+        e.textContent=item.text||'Seu texto aqui';
+      }else if(item.type==='button'){
+        const inner=node('g',{transform:`scale(${w/108} ${h/29})`},g);
+        node('rect',{width:108,height:29,fill:item.fill||'#4658e8'},inner);
+        const e=node('text',{x:10,y:18,fill:'#fff','font-size':8.8,'font-family':'Segoe UI,Arial,sans-serif'},inner);
+        e.textContent='CloudDraw / 01';
+      }else if(item.type==='path'){
+        const inner=node('g',{transform:`scale(${w/376} ${h/115})`},g);
+        const d='M0 97 C74 5 179 110 249 27 S349 10 376 81';
+        node('path',{d,fill:'none',stroke:'transparent','stroke-width':17,'pointer-events':'stroke'},inner);
+        const p=node('path',{d,fill:'none',stroke:item.stroke||'#1e824c','stroke-width':3.2,'stroke-linecap':'round','vector-effect':'non-scaling-stroke',pathLength:1},inner);
+        if(!reduce && !drag){
+          p.setAttribute('stroke-dasharray','1');
+          node('animate',{attributeName:'stroke-dashoffset',values:'1;0;0',keyTimes:'0;.45;1',dur:'7s',repeatCount:'indefinite'},p);
+        }
+      }else if(item.type==='brush'||item.type==='line'){
+        const coords=item.points||[[0,50],[100,50]];
+        const pathData=coords.map((p,i)=>`${i?'L':'M'} ${p[0]} ${p[1]}`).join(' ');
+        const inner=node('g',{transform:`scale(${w/100} ${h/100})`},g);
+        node('path',{d:pathData,fill:'none',stroke:'transparent','stroke-width':12,'vector-effect':'non-scaling-stroke','pointer-events':'stroke'},inner);
+        node('path',{d:pathData,fill:'none',stroke:item.stroke||'#4658e8','stroke-width':item.strokeWidth||2.7,'stroke-linecap':'round','stroke-linejoin':'round','vector-effect':'non-scaling-stroke'},inner);
+      }
+      // Área transparente para facilitar a seleção de textos e curvas.
+      if(['text','headline','subline','button'].includes(item.type))
+        node('rect',{x:0,y:0,width:w,height:h,fill:'transparent','pointer-events':'all'},g);
+    }
+    function renderSelection(){
+      selectionLayer.replaceChildren();
+      const o=current();if(!o||tool!=='select')return;
+      const k=1/zoom,x=o.x,y=o.y,w=o.w,h=o.h;
+      node('rect',{x:x-1*k,y:y-1*k,width:w+2*k,height:h+2*k,fill:'none',stroke:'#197ed1','stroke-width':1*k,'stroke-dasharray':`${4*k} ${2*k}`,'pointer-events':'none'},selectionLayer);
+      // As oito alças seguem os limites reais do objeto editado.
+      const anchors={nw:[x,y],n:[x+w/2,y],ne:[x+w,y],e:[x+w,y+h/2],se:[x+w,y+h],s:[x+w/2,y+h],sw:[x,y+h],w:[x,y+h/2]};
+      for(const [dir,[cx,cy]] of Object.entries(anchors)){
+        const side=8*k;
+        node('rect',{'class':'cd-handle','data-cd-handle':dir,x:cx-side/2,y:cy-side/2,width:side,height:side,rx:.4*k},selectionLayer);
+      }
+      node('path',{d:`M${x+w/2-3*k} ${y+h/2-3*k}l${6*k} ${6*k}m0 ${-6*k}l${-6*k} ${6*k}`,stroke:'#111','stroke-width':1*k,'pointer-events':'none'},selectionLayer);
+    }
+    function updateView(){
+      viewport.setAttribute('transform',`translate(${panX} ${panY}) scale(${zoom})`);
+      zoomLabel.textContent=`${Math.round(74*zoom)}%`;
+      // Combo zoom original da interface também acompanha a simulação.
+      const zoomReadout=[...root.querySelectorAll('text')].find(e=>e.textContent.trim()==='74%'||e.id==='cdSvgZoom');
+      if(zoomReadout){zoomReadout.textContent=`${Math.round(74*zoom)}%`;zoomReadout.id='cdSvgZoom'}
+      activeRect.setAttribute('y',toolY[tool]??100);
+      originalSelectBG?.setAttribute('fill',tool==='select'?'#1b6ec2':'#262626');
+      toolLabel.textContent=toolNames[tool];hint.textContent=toolHints[tool];
+      root.dataset.tool=tool;
+    }
+    function render(){
+      layer.replaceChildren();
+      items.forEach(renderObject);
+      renderSelection();updateView();
+      $$('#cdDemoBar button[data-cd-action="undo"]').forEach(b=>b.disabled=at===0);
+      $$('#cdDemoBar button[data-cd-action="redo"]').forEach(b=>b.disabled=at===timeline.length-1);
+    }
+    function setTool(t){
+      tool=t;selected=selected&&items.some(x=>x.id===selected)?selected:null;
+      renderSelection();updateView();
+    }
+    function toSvg(e){
+      const p=root.createSVGPoint();p.x=e.clientX;p.y=e.clientY;
+      const matrix=root.getScreenCTM();return matrix?p.matrixTransform(matrix.inverse()):{x:0,y:0};
+    }
+    function toWorld(p){return{x:(p.x-panX)/zoom,y:(p.y-panY)/zoom}}
+    function within(p){return p.x>=workspace.x&&p.x<=workspace.x+workspace.w&&p.y>=workspace.y&&p.y<=workspace.y+workspace.h}
+    function zoomAt(factor,p){
+      const next=Math.min(2.6,Math.max(.45,zoom*factor)),r=next/zoom;
+      panX=p.x-(p.x-panX)*r;panY=p.y-(p.y-panY)*r;zoom=next;renderSelection();updateView();
+    }
+    function chooseColor(hex,asOutline=false){
+      color=hex;
+      const o=current();
+      if(o&&colorable(o)){
+        if(['line','brush','path'].includes(o.type)||asOutline){o.stroke=hex;o.strokeWidth=o.strokeWidth||2.5}
+        else o.fill=hex;
+        remember();render();
+      }else if(o&&['headline','subline','text'].includes(o.type)){
+        o.fill=hex;remember();render();
+      }
+      hint.textContent=`Cor ${asOutline?'de contorno':'de preenchimento'} selecionada: ${hex.toUpperCase()}. ${toolHints[tool]}`;
+    }
+    // Faz as amostras já desenhadas no mockup responderem ao clique.
+    $$('.cd-palette-color',pal).forEach(()=>{});
+    $$('#pal rect').forEach(r=>{
+      r.classList.add('cd-palette-color');
+      r.setAttribute('tabindex','0');
+      r.insertAdjacentHTML?.('beforeend',`<title>Aplicar cor ${r.getAttribute('fill')}</title>`);
+    });
+    pal.addEventListener('pointerdown',e=>{
+      const swatch=e.target.closest('rect');if(!swatch)return;
+      chooseColor(swatch.getAttribute('fill'),e.button===2);e.preventDefault();
+    });
+    pal.addEventListener('contextmenu',e=>e.preventDefault());
+    pal.addEventListener('keydown',e=>{
+      if((e.key==='Enter'||e.key===' ')&&e.target.matches('rect')){e.preventDefault();chooseColor(e.target.getAttribute('fill'))}
+    });
+    const paletteNone=root.querySelector('rect[x="1099"][y="124"]');
+    paletteNone?.addEventListener('pointerdown',e=>{chooseColor('none',e.button===2);e.stopPropagation();e.preventDefault()});
+    function startDrag(e,kind,extra={}){
+      drag={kind,pid:e.pointerId,start:toSvg(e),startWorld:toWorld(toSvg(e)),before:snapshot(),...extra};
+      root.classList.add('cd-dragging');root.setPointerCapture(e.pointerId);e.preventDefault();
+    }
+    function spawn(t,p){
+      const base={id:uid(),type:t,x:p.x,y:p.y,w:2,h:2,fill:color,strokeWidth:2.6};
+      if(t==='pen'||t==='brush'){
+        base.type=t==='pen'?'line':'brush';base.fill='none';base.stroke=color;
+        base.points=[[0,50],[100,50]];
+      }
+      return base;
+    }
+    function pointOnPage(p){
+      // Permite desenhar na folha e, como o CloudDraw, também fora dela, na área cinza.
+      return{x:Math.max(-300,Math.min(1400,p.x)),y:Math.max(-300,Math.min(1000,p.y))};
+    }
+    function handleDown(e){
+      if(e.button!==0&&e.button!==1)return;
+      const hit=e.target.closest('[data-cd-tool]');
+      if(hit){setTool(hit.dataset.cdTool);root.focus({preventScroll:true});e.preventDefault();return}
+      if(e.target.closest('#pal')||e.target===paletteNone)return;
+      let p=toSvg(e);
+      if(!within(p))return;
+      root.focus({preventScroll:true});
+      if(e.button===1||usingSpace||tool==='hand'){
+        startDrag(e,'pan',{startPan:{x:panX,y:panY}});return;
+      }
+      if(tool==='zoom'){
+        zoomAt(e.shiftKey?1/1.25:1.25,p);e.preventDefault();return;
+      }
+      const w=pointOnPage(toWorld(p));
+      if(tool==='select'){
+        const h=e.target.closest('[data-cd-handle]');
+        if(h&&current()){
+          startDrag(e,'resize',{handle:h.dataset.cdHandle,ref:deepCopy(current())});return;
+        }
+        const o=e.target.closest('[data-cd-id]');
+        selected=o?.getAttribute('data-cd-id')||null;
+        renderSelection();
+        if(selected)startDrag(e,'move',{ref:deepCopy(current())});
+        return;
+      }
+      if(tool==='text'){
+        const obj={id:uid(),type:'text',x:w.x,y:w.y-22,w:165,h:28,fill:color,text:'Seu texto aqui'};
+        items.push(obj);selected=obj.id;remember();setTool('select');render();return;
+      }
+      if(['rect','ellipse','pen','brush'].includes(tool)){
+        const obj=spawn(tool,w);
+        const kind=tool==='brush'?'brush':tool==='pen'?'pen':'shape';
+        startDrag(e,kind,{object:obj,worldPoints:[w]});
+        preview.replaceChildren();return;
+      }
+    }
+    function updateDrag(e){
+      if(!drag||drag.pid!==e.pointerId)return;
+      const p=toSvg(e),world=pointOnPage(toWorld(p));
+      const deltaX=world.x-drag.startWorld.x,deltaY=world.y-drag.startWorld.y;
+      if(drag.kind==='pan'){
+        panX=drag.startPan.x+(p.x-drag.start.x);panY=drag.startPan.y+(p.y-drag.start.y);
+        updateView();return;
+      }
+      if(drag.kind==='move'){
+        const o=current();if(!o)return;
+        o.x=drag.ref.x+deltaX;o.y=drag.ref.y+deltaY;
+        render();return;
+      }
+      if(drag.kind==='resize'){
+        const o=current(),r=drag.ref;if(!o)return;
+        let left=r.x,right=r.x+r.w,top=r.y,bottom=r.y+r.h;
+        const h=drag.handle;
+        if(h.includes('w'))left=Math.min(right-9,left+deltaX);
+        if(h.includes('e'))right=Math.max(left+9,right+deltaX);
+        if(h.includes('n'))top=Math.min(bottom-9,top+deltaY);
+        if(h.includes('s'))bottom=Math.max(top+9,bottom+deltaY);
+        if(e.shiftKey&&h.length===2){
+          const ratio=Math.max((right-left)/r.w,(bottom-top)/r.h);
+          const nw=Math.max(9,r.w*ratio),nh=Math.max(9,r.h*ratio);
+          if(h.includes('w'))left=right-nw;else right=left+nw;
+          if(h.includes('n'))top=bottom-nh;else bottom=top+nh;
+        }
+        o.x=left;o.y=top;o.w=right-left;o.h=bottom-top;
+        render();return;
+      }
+      if(drag.kind==='shape'){
+        const ox=drag.startWorld.x,oy=drag.startWorld.y;
+        const x=Math.min(ox,world.x),y=Math.min(oy,world.y),w=Math.abs(world.x-ox),h=Math.abs(world.y-oy);
+        const o=drag.object;o.x=x;o.y=y;o.w=w;o.h=h;
+        preview.replaceChildren();
+        const tag=o.type==='rect'?'rect':'ellipse';
+        node(tag,tag==='rect'?{x,y,width:w,height:h,fill:color,'fill-opacity':.75,stroke:'#1b6ec2','stroke-dasharray':'4 2'}:{cx:x+w/2,cy:y+h/2,rx:w/2,ry:h/2,fill:color,'fill-opacity':.75,stroke:'#1b6ec2','stroke-dasharray':'4 2'},preview);
+        return;
+      }
+      if(drag.kind==='brush'||drag.kind==='pen'){
+        if(drag.kind==='brush' && drag.worldPoints.length<500)drag.worldPoints.push(world);
+        else if(drag.kind==='pen')drag.worldPoints=[drag.startWorld,world];
+        preview.replaceChildren();
+        const d=drag.worldPoints.map((v,i)=>`${i?'L':'M'}${v.x} ${v.y}`).join(' ');
+        node('path',{d,fill:'none',stroke:color,'stroke-width':drag.kind==='brush'?3:2.6,'stroke-linecap':'round','stroke-linejoin':'round'},preview);
+      }
+    }
+    function finishDrag(e){
+      if(!drag||drag.pid!==e.pointerId)return;
+      const state=drag;
+      if(state.kind==='shape'){
+        if(state.object.w>4&&state.object.h>4){items.push(state.object);selected=state.object.id}
+        setTool(state.object.type); // mantém ferramenta ativa para próximos desenhos
+      }
+      if(state.kind==='brush'||state.kind==='pen'){
+        const pts=state.worldPoints;
+        const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+        const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+        if(pts.length>=2&&Math.hypot(maxX-minX,maxY-minY)>4){
+          const w=Math.max(2,maxX-minX),h=Math.max(2,maxY-minY);
+          const o=state.object;o.x=minX;o.y=minY;o.w=w;o.h=h;
+          o.points=pts.map(p=>[(p.x-minX)/w*100,(p.y-minY)/h*100]);
+          items.push(o);selected=o.id;
+        }
+      }
+      preview.replaceChildren();drag=null;root.classList.remove('cd-dragging');
+      try{if(root.hasPointerCapture(e.pointerId))root.releasePointerCapture(e.pointerId)}catch(_){ }
+      remember();render();
+    }
+    root.addEventListener('pointerdown',handleDown);
+    root.addEventListener('pointermove',updateDrag);
+    root.addEventListener('pointerup',finishDrag);
+    root.addEventListener('pointercancel',e=>{if(!drag)return;preview.replaceChildren();drag=null;root.classList.remove('cd-dragging');render()});
+    root.addEventListener('contextmenu',e=>{if(within(toSvg(e))||e.target.closest('#pal'))e.preventDefault()});
+    root.addEventListener('wheel',e=>{
+      const p=toSvg(e);if(!within(p))return;
+      e.preventDefault();zoomAt(e.deltaY<0?1.12:1/1.12,p);
+    },{passive:false});
+    const midpoint={x:622,y:342};
+    $$('#cdDemoBar [data-cd-action]').forEach(button=>button.addEventListener('click',()=>{
+      const a=button.dataset.cdAction;
+      if(a==='undo')restore(false);
+      if(a==='redo')restore(true);
+      if(a==='zoomin')zoomAt(1.25,midpoint);
+      if(a==='zoomout')zoomAt(1/1.25,midpoint);
+      if(a==='fit'){zoom=1;panX=0;panY=0;render()}
+      if(a==='reset')setup();
+    }));
+    root.addEventListener('keydown',e=>{
+      if(e.code==='Space'){usingSpace=true;e.preventDefault();return}
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){restore(e.shiftKey);e.preventDefault();return}
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){restore(true);e.preventDefault();return}
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='d'){
+        const o=current();if(o){const copy=deepCopy(o);copy.id=uid();copy.x+=14;copy.y+=14;items.push(copy);selected=copy.id;remember();render()}
+        e.preventDefault();return;
+      }
+      if(e.key==='Delete'||e.key==='Backspace'){
+        if(selected){items=items.filter(o=>o.id!==selected);selected=null;remember();render()}
+        e.preventDefault();return;
+      }
+      if(e.key==='Escape'){selected=null;setTool('select');renderSelection();return}
+      if(e.key==='+'||e.key==='='){zoomAt(1.2,midpoint);e.preventDefault();return}
+      if(e.key==='-'){zoomAt(1/1.2,midpoint);e.preventDefault();return}
+      const short={v:'select',r:'rect',e:'ellipse',b:'brush',h:'hand',z:'zoom'};
+      const t=short[e.key.toLowerCase()];if(t&&!e.ctrlKey&&!e.metaKey){setTool(t);e.preventDefault()}
+    });
+    root.addEventListener('keyup',e=>{if(e.code==='Space')usingSpace=false});
+    addEventListener('keyup',e=>{if(e.code==='Space')usingSpace=false});
+    addEventListener('blur',()=>{usingSpace=false});
+    setup();
+  })();
+
+
+  /* A janela da demonstração fica fixa para permitir edição vetorial precisa. */
+
+  /* ======== Laboratório Bézier ======== */
+  const svg=$('#bz'),W=600,H=360;
+  const P=[{x:70,y:285},{x:140,y:60},{x:420,y:50},{x:530,y:270}];
+  const el=(n,a,p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e};
+  const lerp=(a,b,t)=>({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});
+
+  const curve=el('path',{fill:'none',stroke:'#4fd18b','stroke-width':4,'stroke-linecap':'round'});
+  const gCon=el('g');
+  const cl=[];for(let i=0;i<5;i++)cl.push(el('line',{stroke:i<3?'#5d756a':'#ffc457','stroke-width':1.4,'stroke-dasharray':i<3?'':'0'},gCon));
+  const cp=[];for(let i=0;i<5;i++)cp.push(el('circle',{r:3.6,fill:i<3?'#8fa99d':'#ffc457'},gCon));
+  const hl=[el('line',{stroke:'#4ea1ff','stroke-width':1.3}),el('line',{stroke:'#4ea1ff','stroke-width':1.3})];
+  const tp=el('circle',{r:8,fill:'#ff6fa8',stroke:'#fff','stroke-width':2});
+  const hs=[];
+  P.forEach((p,i)=>{
+    const anchor=i===0||i===3;
+    const h=anchor?el('rect',{width:14,height:14,rx:2,fill:'#fff',stroke:'#000','stroke-width':1.6,class:'h'}):el('circle',{r:7.5,fill:'#4ea1ff',stroke:'#fff','stroke-width':2,class:'h'});
+    h.dataset.i=i;hs.push(h);
+    const hit=h;hit.style.touchAction='none';
+  });
+
+  const tR=$('#tR'),tV=$('#tVal'),aN=$('#aN'),cS=$('#cS'),out=$('#bzOut');
+  let t=.5,dir=1,drag=-1,visible=false,last=0;
+
+  function render(){
+    const [a,b,c,d]=P;
+    curve.setAttribute('d','M'+a.x+' '+a.y+' C'+b.x+' '+b.y+' '+c.x+' '+c.y+' '+d.x+' '+d.y);
+    hl[0].setAttribute('x1',a.x);hl[0].setAttribute('y1',a.y);hl[0].setAttribute('x2',b.x);hl[0].setAttribute('y2',b.y);
+    hl[1].setAttribute('x1',d.x);hl[1].setAttribute('y1',d.y);hl[1].setAttribute('x2',c.x);hl[1].setAttribute('y2',c.y);
+    const q=[lerp(a,b,t),lerp(b,c,t),lerp(c,d,t)];
+    const r=[lerp(q[0],q[1],t),lerp(q[1],q[2],t)];
+    const s=lerp(r[0],r[1],t);
+    const segs=[[q[0],q[1]],[q[1],q[2]],[a,a],[r[0],r[1]],[a,a]];
+    // linhas: nível1 (a-b, b-c, c-d) usam P; nível2 q0-q1,q1-q2; nível3 r0-r1
+    const L=[[a,b],[b,c],[c,d],[q[0],q[1]],[q[1],q[2]]];
+    L.forEach((l,i)=>{cl[i].setAttribute('x1',l[0].x);cl[i].setAttribute('y1',l[0].y);cl[i].setAttribute('x2',l[1].x);cl[i].setAttribute('y2',l[1].y)});
+    const pts=[q[0],q[1],q[2],r[0],r[1]];
+    pts.forEach((p,i)=>{cp[i].setAttribute('cx',p.x);cp[i].setAttribute('cy',p.y)});
+    // linha final r0-r1 (tangente)
+    if(!render.tan)render.tan=el('line',{stroke:'#ff6fa8','stroke-width':2},gCon);
+    render.tan.setAttribute('x1',r[0].x);render.tan.setAttribute('y1',r[0].y);render.tan.setAttribute('x2',r[1].x);render.tan.setAttribute('y2',r[1].y);
+    gCon.style.display=cS.checked?'':'none';
+    tp.setAttribute('cx',s.x);tp.setAttribute('cy',s.y);
+    hs.forEach((h,i)=>{
+      if(i===0||i===3){h.setAttribute('x',P[i].x-7);h.setAttribute('y',P[i].y-7)}
+      else{h.setAttribute('cx',P[i].x);h.setAttribute('cy',P[i].y)}
+    });
+    out.textContent='M '+Math.round(a.x)+' '+Math.round(a.y)+' C '+Math.round(b.x)+' '+Math.round(b.y)+', '+Math.round(c.x)+' '+Math.round(c.y)+', '+Math.round(d.x)+' '+Math.round(d.y);
+    tV.textContent=t.toFixed(2);
+  }
+  // reordenar: pontos por cima
+  svg.appendChild(tp);hl.forEach(l=>svg.insertBefore(l,tp));hs.forEach(h=>svg.appendChild(h));
+  svg.appendChild(tp);
+
+  function pos(e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
+  hs.forEach(h=>h.addEventListener('pointerdown',e=>{drag=+h.dataset.i;h.setPointerCapture(e.pointerId);e.preventDefault()}));
+  svg.addEventListener('pointermove',e=>{
+    if(drag<0)return;
+    const p=pos(e);P[drag].x=Math.max(10,Math.min(W-10,p.x));P[drag].y=Math.max(10,Math.min(H-10,p.y));render();
+  });
+  const up=()=>{drag=-1};
+  svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+
+  tR.addEventListener('input',()=>{t=tR.value/100;aN.checked=false;render()});
+  cS.addEventListener('change',render);
+
+  new IntersectionObserver(es=>{visible=es[0].isIntersecting;if(visible)last=performance.now()},{threshold:.1}).observe(svg);
+
+  function loop(ts){
+    if(visible&&aN.checked&&drag<0&&!reduce){
+      t+=(ts-last)/4200*dir;
+      if(t>=1){t=1;dir=-1}if(t<=0){t=0;dir=1}
+      tR.value=Math.round(t*100);
+    }
+    last=ts;
+    if(visible)render();
+    requestAnimationFrame(loop);
+  }
+  render();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
