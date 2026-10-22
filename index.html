@@ -956,7 +956,7 @@ footer{border-top:1px solid var(--line2);background:var(--bg2);padding:42px 0;co
     <div class="dl reveal">
       <svg class="dl-logo"><use href="#logo"/></svg>
       <h2>Baixe o <span class="grad">CloudDraw</span></h2>
-      <p class="lead">Estamos finalizando a primeira versão pública. Em breve o download estará disponível aqui.</p>
+      <p class="lead">Escolha o instalador ou a versão portátil na página de download. O CloudDraw se atualiza sozinho depois de instalado.</p>
       <div class="cta">
         <a href="#download" class="btn primary" data-download id="dlMain">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
@@ -987,11 +987,11 @@ footer{border-top:1px solid var(--line2);background:var(--bg2);padding:42px 0;co
 <script>
 /* ============================================================
    CONFIGURAÇÃO DO DOWNLOAD
-   Quando tiver o link, é só colocar aqui embaixo.
-   Ex.: const DOWNLOAD_URL = "https://seusite.com/CloudDraw-Setup.exe";
-   Enquanto estiver vazio, todos os botões mostram "Em breve".
+   Os botões abrem, em nova guia, a página da versão mais recente no
+   GitHub (lá ficam o instalador e o portátil).
+   Deixando vazio, todos os botões voltam a mostrar "Em breve".
    ============================================================ */
-const DOWNLOAD_URL = "";
+const DOWNLOAD_URL = "https://github.com/cloudgraficaweb/clouddraw/releases/latest";
 
 (function(){
   const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1001,7 +1001,7 @@ const DOWNLOAD_URL = "";
   const toast=$('#toast'); let tt;
   function showToast(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('show'),2600)}
   $$('[data-download]').forEach(a=>{
-    if(DOWNLOAD_URL){a.href=DOWNLOAD_URL;a.setAttribute('download','');$$('[data-soon]',a).forEach(p=>p.remove())}
+    if(DOWNLOAD_URL){a.href=DOWNLOAD_URL;a.target='_blank';a.rel='noopener';$$('[data-soon]',a).forEach(p=>p.remove())}
     else a.addEventListener('click',e=>{
       const inDl=a.closest('#download');
       if(!inDl){return}            // leva até a seção de download
